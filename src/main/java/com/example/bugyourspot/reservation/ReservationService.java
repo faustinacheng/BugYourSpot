@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReservationService {
@@ -23,6 +24,12 @@ public class ReservationService {
     }
 
     public void addNewReservation(Reservation reservation) {
-        System.out.println(reservation);
+        Optional<Reservation> reservationOptional =
+                reservationRepository.findReservationByClientId(reservation.getClientId());
+        if (reservationOptional.isPresent()) {
+            throw new IllegalStateException("client taken");
+        }
+
+        reservationRepository.save(reservation);
     }
 }
