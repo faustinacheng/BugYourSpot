@@ -32,4 +32,12 @@ public class ReservationService {
 
         reservationRepository.save(reservation);
     }
+
+    public void deleteReservation(Long id) {
+        boolean exists = reservationRepository.existsById(id);
+        if (!exists) {
+            throw new IllegalStateException("reservation with id " + id + " does not exist");
+        }
+        reservationRepository.deleteById(id);
+    }
 }

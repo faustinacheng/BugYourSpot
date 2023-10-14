@@ -23,4 +23,9 @@ public class ReservationController {
     public void createReservation (@RequestBody Reservation reservation) {
         reservationService.addNewReservation(reservation);
     }
+
+    @DeleteMapping(path = "{id}")
+    public void cancelReservation(@PathVariable("id") Long id) {
+        reservationService.deleteReservation(id);
+    }
 }
