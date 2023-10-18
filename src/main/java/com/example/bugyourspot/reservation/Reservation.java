@@ -18,7 +18,7 @@ public class Reservation {
             generator = "reservation_sequence"
     )
 
-    private Long id;
+    private Long reservationId;
     private Integer clientId;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -26,8 +26,8 @@ public class Reservation {
     public Reservation(){
     }
 
-    public Reservation(Long id, Integer clientId, LocalDateTime startTime, LocalDateTime endTime) {
-        this.id = id;
+    public Reservation(Long reservationId, Integer clientId, LocalDateTime startTime, LocalDateTime endTime) {
+        this.reservationId = reservationId;
         this.clientId = clientId;
         this.startTime = startTime;
         this.endTime = endTime;

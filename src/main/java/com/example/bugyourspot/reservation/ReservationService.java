@@ -14,10 +14,12 @@ import java.util.Optional;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    // private final CustomFields customFields;
 
     @Autowired
     public ReservationService(ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
+        // instantiate
     }
 
     @GetMapping
@@ -35,18 +37,18 @@ public class ReservationService {
         reservationRepository.save(reservation);
     }
 
-    public void deleteReservation(Long id) {
-        boolean exists = reservationRepository.existsById(id);
+    public void deleteReservation(Long reservationId) {
+        boolean exists = reservationRepository.existsById(reservationId);
         if (!exists) {
-            throw new IllegalStateException("reservation with id " + id + " does not exist");
+            throw new IllegalStateException("reservation with id " + reservationId + " does not exist");
         }
-        reservationRepository.deleteById(id);
+        reservationRepository.deleteById(reservationId);
     }
 
     @Transactional
-    public void updateReservation(Long id, LocalDateTime startTime, LocalDateTime endTime) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("reservation with id " + id + " does not exist"));
+    public void updateReservation(Long reservationId, LocalDateTime startTime, LocalDateTime endTime) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalStateException("reservation with id " + reservationId + " does not exist"));
 
         if (startTime != null && !Objects.equals(reservation.getStartTime(), startTime)) {
             // TODO: limit number of reservations per certain time slot

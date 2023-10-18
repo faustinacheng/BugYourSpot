@@ -26,17 +26,17 @@ public class ReservationController {
         reservationService.addNewReservation(reservation);
     }
 
-    @DeleteMapping(path = "{id}")
-    public void cancelReservation(@PathVariable("id") Long id) {
-        reservationService.deleteReservation(id);
+    @DeleteMapping(path = "{reservationId}")
+    public void cancelReservation(@PathVariable("reservationId") Long reservationId) {
+        reservationService.deleteReservation(reservationId);
     }
 
-    @PutMapping(path = "{id}")
+    @PutMapping(path = "{reservationId}")
     public void updateReservation(
-            @PathVariable("id") Long id,
+            @PathVariable("reservationId") Long reservationId,
             @RequestParam(required = false) LocalDateTime startTime,
             @RequestParam(required = false) LocalDateTime endTime
     ) {
-        reservationService.updateReservation(id, startTime, endTime);
+        reservationService.updateReservation(reservationId, startTime, endTime);
     }
 }
