@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -14,11 +15,13 @@ import java.util.Optional;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final CustomFieldRepository customFieldRepository;
     // private final CustomFields customFields;
 
     @Autowired
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(ReservationRepository reservationRepository, CustomFieldRepository customFieldRepository) {
         this.reservationRepository = reservationRepository;
+        this.customFieldRepository = customFieldRepository;
         // instantiate
     }
 
@@ -34,7 +37,15 @@ public class ReservationService {
             throw new IllegalStateException("client taken");
         }
 
+        // TODO: save custom field values to reservationCustomValueRepository
+
         reservationRepository.save(reservation);
+    }
+
+    public void createReservationSchema(Map<String, Object>[] schema) {
+        // TODO:
+            // check if all required fields provided in schema with expected types
+            // update tables in CustomFieldRepository
     }
 
     public void deleteReservation(Long reservationId) {
