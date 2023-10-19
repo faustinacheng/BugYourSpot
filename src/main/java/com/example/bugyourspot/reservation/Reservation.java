@@ -20,21 +20,24 @@ public class Reservation {
 
     private Long reservationId;
     private Integer clientId;
+    private Integer customerId;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
     public Reservation(){
     }
 
-    public Reservation(Long reservationId, Integer clientId, LocalDateTime startTime, LocalDateTime endTime) {
+    public Reservation(Long reservationId, Integer clientId, Integer customerId, LocalDateTime startTime, LocalDateTime endTime) {
         this.reservationId = reservationId;
+        this.customerId = customerId;
         this.clientId = clientId;
         this.startTime = startTime;
         this.endTime = endTime;
     }
 
-    public Reservation(Integer clientId, LocalDateTime startTime, LocalDateTime endTime) {
+    public Reservation(Integer clientId, Integer customerId, LocalDateTime startTime, LocalDateTime endTime) {
         this.clientId = clientId;
+        this.customerId = customerId;
         this.startTime = startTime;
         this.endTime = endTime;
     }
@@ -42,6 +45,8 @@ public class Reservation {
     public Integer getClientId() {
         return clientId;
     }
+
+    public Integer getCustomerId() { return customerId; }
 
     public LocalDateTime getStartTime() {
         return startTime;
@@ -54,6 +59,8 @@ public class Reservation {
     public void setClientId(Integer clientId) {
         this.clientId = clientId;
     }
+
+    public void setCustomerId(Integer customerId) { this.customerId = customerId; }
 
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
