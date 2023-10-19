@@ -24,6 +24,8 @@ public class Reservation {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
+    // TODO: store custom values in map?
+
     public Reservation(){
     }
 
@@ -55,6 +57,8 @@ public class Reservation {
     public LocalDateTime getEndTime() {
         return endTime;
     }
+
+    public Long getReservationId() { return reservationId; }
 
     public void setClientId(Integer clientId) {
         this.clientId = clientId;
