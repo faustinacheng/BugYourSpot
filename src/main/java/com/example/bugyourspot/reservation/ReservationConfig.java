@@ -15,12 +15,14 @@ public class ReservationConfig {
         return args -> {
             Reservation reservation1 = new Reservation(
                     4156,
+                    1,
                     LocalDateTime.now(),
                     LocalDateTime.now()
             );
 
             Reservation reservation2 = new Reservation(
                     4113,
+                    1,
                     LocalDateTime.now(),
                     LocalDateTime.now()
             );
