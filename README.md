@@ -1,11 +1,7 @@
 # BugYourSpot 🐛🐞🪲
 
 a reservation booking service, made with <3 by BugBusters.\
-Peter Ma\
-Faustina Cheng\
-Shreya Somayajula\
-Youngseo Lee\
-Patrick Tong
+Peter Ma, Faustina Cheng, Shreya Somayajula, Youngseo Lee, & Patrick Tong
 
 # Components:
 
@@ -19,7 +15,7 @@ The ReservationService class acts as the next layer of logic, providing the meth
 ```POST /reservations/createReservationSchema```\
 Description: Application provides certain fields that they want to represent a reservation with. This is in the form of a JSON object. The service validates these fields to ensure that it matches the expected format. Once validated, our service will dynamically generate the database schema based on the custom fields and their data types. Thus, this API should be called just once and before all other API calls.\
 Request Body: JSON object that represents the fields of a reservation\
-Example Usage: ```/createReservationSchema```\
+Example Usage: ```/createReservationSchema```
 1. Restaurant
 ```json
 {
@@ -177,7 +173,7 @@ Return ```reservationId``` for successful reservation
 Description: Update an existing reservation or time slot.\
 Usage: Applications can use this endpoint to modify reservation details, such as changing the booking time or updating user information.\
 
-Request Body: JSON with reservationId, clientId, and the fields to be updated\
+Request Body: JSON with reservationId, clientId, and the fields to be updated
 
 Example request:
 ```json
@@ -288,12 +284,78 @@ Possible statuses: “success”, “client not initialized”
     ]
 }
 ```
+# Tests
+Using JUnit + Mockito framework
+- Unit Tests:
+	- ```ReservationRepositoryTest.java```
+	- ```ReservationServiceTest.java```
+	- ```ReservationTest.java```
+- System Tests:
+	- ```ReservationControllerTest.java```
+	- Mock server-client communication over network (with localhost) using Intellij's HTTP Client Tool
+   	###
+Example System Test Run:
+```
+POST http://localhost:8080/api/v1/reservation
+Content-Type: application/json
+
+{
+  "clientId":4118,
+  "startTime":"2023-10-14T15:01:13.83666",
+  "endTime":"2023-10-14T15:01:13.836673"
+}
+
+<> 2023-10-14T164311.500.json
+<> 2023-10-14T164200.500.json
+
+###
+DELETE http://localhost:8080/api/v1/reservation/1
+
+<> 2023-10-14T165008.500.json
+
+###
+PUT http://localhost:8080/api/v1/reservation/1?endTime=2022-10-14T17:05:59.504538
+
+<> f-1.txt
+<> f.txt
+<> 2023-10-14T170612.404.json
+<> 2023-10-14T165008.500.json
+
+###
+POST http://localhost:8080/api/v1/reservation
+```
+Example Failed Requests
+```
+{
+  "timestamp": "2023-10-14T20:43:11.124+00:00",
+  "status": 500,
+  "error": "Internal Server Error",
+  "message": "client taken",
+  "path": "/api/v1/reservation"
+}
 
 
-# Notes Before Iteration Demo
+{
+  "timestamp": "2023-10-14T20:50:08.552+00:00",
+  "status": 500,
+  "error": "Internal Server Error",
+  "message": "reservation with id 1 does not exist",
+  "path": "/api/v1/reservation/1"
+}
+```
 
+# Setting up Style Checker
 To set up pre commit hooks for linting: <br>
-pip install pre-commit<br>
-pre-commit install
+```pip install pre-commit<br>```\
+```pre-commit install```\
+
+# How to Build, Run, & Test
+- Currently: the PostgreSQL database is being hosted locally. Thus, end-to-end testing of this service can only be done on our local machines. We start up our database, use Maven to build the service, and execute all unit/system tests by manually running them in an IDE.
+- Next steps: use Docker to create container for application. From there, our client will be able to run an instance of our program on any machine, since the PostgreSQL database will be hosted on GCP. Further, we will set up a git pre-push hook to automatically run all unit and system tests upon pushing to the repo.
+
+# Sources
+[Spring Boot Tutorial](https://www.youtube.com/watch?v=9SGDpanrc8U&t=1333s)\
+[EAV Explained](https://www.youtube.com/watch?v=9SGDpanrc8U&t=1333s)
+
 
 
