@@ -350,8 +350,12 @@ Example Failed Requests
 
 # Setting up Style Checker
 To set up pre commit hooks for linting: <br>
-```pip install pre-commit<br>```\
-```pre-commit install```\
+```pip install pre-commit```\
+```pre-commit install```
+
+Example Style Checker Reports:\
+![](prettier_passed.png)
+![](prettier_failed.png)
 
 # How to Build, Run, & Test
 - Currently: the PostgreSQL database is being hosted locally. Thus, end-to-end testing of this service can only be done on our local machines. We start up our database, use Maven to build the service, and execute all unit/system tests by manually running them in an IDE.
@@ -361,8 +365,3 @@ To set up pre commit hooks for linting: <br>
 [Spring Boot Tutorial](https://www.youtube.com/watch?v=9SGDpanrc8U&t=1333s)\
 [EAV Explained](https://www.youtube.com/watch?v=9SGDpanrc8U&t=1333s)
 
-
-# Here are some images of the Pre-commit hook in action
-
-![](prettier_passed.png)
-![](prettier_failed.png)
