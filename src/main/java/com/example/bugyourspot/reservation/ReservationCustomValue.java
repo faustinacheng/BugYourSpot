@@ -1,4 +1,6 @@
 package com.example.bugyourspot.reservation;
+import com.example.bugyourspot.reservation.Attribute;
+import com.example.bugyourspot.reservation.Reservation;
 import jakarta.persistence.*;
 
 @Entity

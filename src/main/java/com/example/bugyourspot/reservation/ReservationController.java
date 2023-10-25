@@ -24,10 +24,12 @@ public class ReservationController {
         return reservationService.getReservations();
     }
 
+//    @PostMapping
     @RequestMapping(
-            value = "/process",
+            value = "/createReservationSchema",
             method = RequestMethod.POST)
     public void createReservationSchema (@RequestBody Map<String, Object>[] schema) {
+        System.out.println(schema);
         reservationService.createReservationSchema(schema);
     }
 
@@ -47,8 +49,8 @@ public class ReservationController {
     public void updateReservation(
             @PathVariable("reservationId") Long reservationId,
             @RequestParam(required = false) LocalDateTime startTime,
-            @RequestParam(required = false) LocalDateTime endTime
+            @RequestParam(required = false) Integer numSlots
     ) {
-        reservationService.updateReservation(reservationId, startTime, endTime);
+        reservationService.updateReservation(reservationId, startTime, numSlots);
     }
 }

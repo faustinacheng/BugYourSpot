@@ -14,17 +14,17 @@ public class ReservationConfig {
     CommandLineRunner commandLineRunner(ReservationRepository repository) {
         return args -> {
             Reservation reservation1 = new Reservation(
-                    4156,
-                    1,
+                    55L,
+                    1L,
                     LocalDateTime.now(),
-                    LocalDateTime.now()
+                    5
             );
 
             Reservation reservation2 = new Reservation(
-                    4113,
-                    1,
+                    4113L,
+                    1L,
                     LocalDateTime.now(),
-                    LocalDateTime.now()
+                    2
             );
 
             repository.saveAll(

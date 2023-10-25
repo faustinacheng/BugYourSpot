@@ -1,5 +1,6 @@
-package com.example.bugyourspot.reservation;
+package temp;
 
+import com.example.bugyourspot.reservation.Attribute;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

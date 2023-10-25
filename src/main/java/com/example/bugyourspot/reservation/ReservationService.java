@@ -44,6 +44,7 @@ public class ReservationService {
 
     public void createReservationSchema(Map<String, Object>[] schema) {
         // TODO:
+
             // check if all required fields provided in schema with expected types
             // update tables in CustomFieldRepository
     }
@@ -57,7 +58,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void updateReservation(Long reservationId, LocalDateTime startTime, LocalDateTime endTime) {
+    public void updateReservation(Long reservationId, LocalDateTime startTime, Integer numSlots) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalStateException("reservation with id " + reservationId + " does not exist"));
 
@@ -66,9 +67,8 @@ public class ReservationService {
             reservation.setStartTime(startTime);
         }
 
-        if (endTime != null && !Objects.equals(reservation.getEndTime(), endTime)) {
-            // TODO: Check if start time < end time
-            reservation.setEndTime(endTime);
+        if (numSlots != null && !Objects.equals(reservation.getNumSlots(), numSlots)) {
+            reservation.setNumSlots(numSlots);
         }
     }
 }
