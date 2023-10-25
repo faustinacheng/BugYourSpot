@@ -22,26 +22,26 @@ public class Reservation {
     private Integer clientId;
     private Integer customerId;
     private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private Integer numSlots;
 
     // TODO: store custom values in map?
 
     public Reservation(){
     }
 
-    public Reservation(Long reservationId, Integer clientId, Integer customerId, LocalDateTime startTime, LocalDateTime endTime) {
+    public Reservation(Long reservationId, Integer clientId, Integer customerId, LocalDateTime startTime, Integer numSlots) {
         this.reservationId = reservationId;
         this.customerId = customerId;
         this.clientId = clientId;
         this.startTime = startTime;
-        this.endTime = endTime;
+        this.numSlots = numSlots;
     }
 
-    public Reservation(Integer clientId, Integer customerId, LocalDateTime startTime, LocalDateTime endTime) {
+    public Reservation(Integer clientId, Integer customerId, LocalDateTime startTime, Integer numSlots) {
         this.clientId = clientId;
         this.customerId = customerId;
         this.startTime = startTime;
-        this.endTime = endTime;
+        this.numSlots = numSlots;
     }
 
     public Integer getClientId() {
@@ -54,8 +54,8 @@ public class Reservation {
         return startTime;
     }
 
-    public LocalDateTime getEndTime() {
-        return endTime;
+    public Integer getNumSlots() {
+        return numSlots;
     }
 
     public Long getReservationId() { return reservationId; }
@@ -70,8 +70,8 @@ public class Reservation {
         this.startTime = startTime;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
+    public void setnumSlots (Integer numSlots) {
+        this.numSlots = numSlots;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class Reservation {
         return "Reservation{" +
                 "clientId=" + clientId +
                 ", startTime=" + startTime +
-                ", endTime=" + endTime +
+                ", endTime=" + numSlots +
                 '}';
     }
 }
