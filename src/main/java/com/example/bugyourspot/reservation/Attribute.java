@@ -7,7 +7,7 @@ public class Attribute {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long attributeId;
-    private Integer clientId;
+    private Long clientId;
 
     private String label;
 
@@ -16,17 +16,17 @@ public class Attribute {
     public Attribute() {
     }
 
-    public Attribute(Integer clientId, String label, String dataType) {
+    public Attribute(Long clientId, String label, String dataType) {
         this.clientId = clientId;
         this.label = label;
         this.dataType = dataType;
     }
 
-    public long getAttributeId() {
+    public Long getAttributeId() {
         return attributeId;
     }
 
-    public long getClient() {
+    public Long getClient() {
         return clientId;
     }
 
