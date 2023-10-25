@@ -11,7 +11,7 @@ public class ReservationCustomValue {
     private Reservation reservation;
     @ManyToOne
     @JoinColumn(name="custom_field_id")
-    private CustomField customField;
+    private Attribute customField;
     private String value; // Store as a string, and convert based on fieldType when necessary
 
     // TODO: getters, setters, etc.

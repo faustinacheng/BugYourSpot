@@ -61,7 +61,7 @@ public class ReservationControllerTest {
         doNothing().when(reservationService).deleteReservation(reservationId);
 
         // actually delete reservation
-        mockMvc.perform(delete("/{id}", reservationId)
+        mockMvc.perform(delete("/{id}", reservationId))
                 .andExpect(status().isOk());
 
         // verify that reservation was deleted
@@ -81,6 +81,6 @@ public class ReservationControllerTest {
                 .andExpect(status().isOk());
 
         // verify that reservation was updated
-        verify(reservationService).updateReservation(existingClient, startTime, endTime);
+        verify(reservationService).updateReservation(reservationId, startTime, endTime);
     }
 }

@@ -15,13 +15,13 @@ import java.util.Optional;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final CustomFieldRepository customFieldRepository;
+//    private final CustomFieldRepository customFieldRepository;
     // private final CustomFields customFields;
 
     @Autowired
-    public ReservationService(ReservationRepository reservationRepository, CustomFieldRepository customFieldRepository) {
+    public ReservationService(ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
-        this.customFieldRepository = customFieldRepository;
+//        this.customFieldRepository = customFieldRepository;
         // instantiate
     }
 
