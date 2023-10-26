@@ -9,19 +9,20 @@ import java.time.LocalDateTime;
 @SpringBootTest
 public class ReservationTest {
 
-    private final int clientId = 1;
-    private final int customerId = 1;
+    private final Long clientId = 1L;
+    private final Long customerId = 1L;
+    private final int numSlots = 3;
     private final LocalDateTime startTime = LocalDateTime.now();
     private final LocalDateTime endTime = LocalDateTime.now().plusHours(2);
     @Test
     public void reservationProperties() {
-        Reservation reservation = new Reservation(clientId, customerId, startTime, endTime);
+        Reservation reservation = new Reservation(clientId, customerId, startTime, numSlots);
 
         // basic test to check attribute retrieval and constructor initialization
         assertEquals(clientId, reservation.getClientId());
         assertEquals(customerId, reservation.getCustomerId());
         assertEquals(startTime, reservation.getStartTime());
-        assertEquals(endTime, reservation.getEndTime());
+        assertEquals(numSlots, reservation.getNumSlots());
     }
 
     @Test
@@ -30,19 +31,19 @@ public class ReservationTest {
         // basic test to check setting attributes
         reservation.setClientId(clientId);
         reservation.setStartTime(startTime);
-        reservation.setEndTime(endTime);
+        reservation.setNumSlots(numSlots);
 
         assertEquals(clientId, reservation.getClientId());
         assertEquals(startTime, reservation.getStartTime());
-        assertEquals(endTime, reservation.getEndTime());
+        assertEquals(numSlots, reservation.getNumSlots());
     }
 
     @Test
     public void toStringMethod() {
-        Reservation reservation = new Reservation(clientId, customerId, startTime, endTime);
+        Reservation reservation = new Reservation(clientId, customerId, startTime, numSlots);
 
         // basic test to check correctness of reservation formatting
-        String expected = "Reservation{clientId=1, startTime=" + startTime + ", endTime=" + endTime + "}";
+        String expected = "Reservation{clientId=1, startTime=" + startTime + ", numSlots=" + numSlots + "}";
         assertEquals(expected, reservation.toString());
     }
 }

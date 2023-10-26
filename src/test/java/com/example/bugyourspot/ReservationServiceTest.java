@@ -1,6 +1,7 @@
 package com.example.bugyourspot;
 
 import com.example.bugyourspot.reservation.ReservationRepository;
+import com.example.bugyourspot.reservation.AttributeRepository;
 import com.example.bugyourspot.reservation.ReservationService;
 import com.example.bugyourspot.reservation.Reservation;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,19 +20,21 @@ public class ReservationServiceTest {
 
     @Mock
     private ReservationRepository reservationRepository;
+    private AttributeRepository attributeRepository;
     private ReservationService reservationService;
     private Reservation reservation;
-    private final int clientId = 1;
-    private final int customerId = 1;
-    private final long reservationId = 0;
-    private final long realId = (long) 1;
-    private final long fakeId = (long) 2;
+    private final Long clientId = 1L;
+    private final Long customerId = 1L;
+    private final Long reservationId = 0L;
+    private final Long fakeId = 2L;
+    private final Long realId = 1L;
+    private final int numSlots = 2;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        reservationService = new ReservationService(reservationRepository);
-        reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), LocalDateTime.now().plusHours(2));
+        reservationService = new ReservationService(reservationRepository, attributeRepository);
+        reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
     }
 
     @Test
@@ -81,18 +84,19 @@ public class ReservationServiceTest {
         //give new start and end time
         LocalDateTime startTime = LocalDateTime.now();
         LocalDateTime endTime = startTime.plusHours(3);
-        Reservation reservation = new Reservation(clientId, customerId, startTime, endTime);
+        Reservation reservation = new Reservation(clientId, customerId, startTime, numSlots);
         Long reservationId = reservation.getReservationId();
-        reservationService.updateReservation(reservationId, startTime, endTime);
+        reservationService.updateReservation(reservationId, startTime, numSlots);
 
         assertEquals(startTime, reservation.getStartTime());
-        assertEquals(endTime, reservation.getEndTime());
+        assertEquals(numSlots, reservation.getNumSlots());
     }
 
     @Test
     public void updateNonExistentReservation() {
         when(reservationRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(IllegalStateException.class, () -> reservationService.updateReservation(1L, LocalDateTime.now(), LocalDateTime.now()));
+        assertThrows(IllegalStateException.class, () -> reservationService.updateReservation(1L,
+                                                            LocalDateTime.now(), numSlots));
     }
 }

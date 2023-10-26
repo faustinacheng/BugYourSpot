@@ -22,13 +22,14 @@ public class ReservationControllerTest {
     @MockBean
     private ReservationService reservationService;
     private Reservation reservation;
-    private long reservationId = 1;
-    private int clientId = 1;
-    private int customerId = 1;
+    private Long reservationId = 1L;
+    private Long clientId = 1L;
+    private Long customerId = 1L;
+    private Integer numSlots = 3;
 
     @BeforeEach
     public void setUp() {
-        reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), LocalDateTime.now().plusHours(2));
+        reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
     }
 
     @Test
@@ -71,16 +72,15 @@ public class ReservationControllerTest {
     @Test
     public void updateReservation() throws Exception {
         LocalDateTime startTime = LocalDateTime.now().plusHours(1);
-        LocalDateTime endTime = LocalDateTime.now().plusHours(3);
-        doNothing().when(reservationService).updateReservation(reservationId, startTime, endTime);
+        doNothing().when(reservationService).updateReservation(reservationId, startTime, numSlots);
 
         // actually update reservation
         mockMvc.perform(put("/{id}", reservationId)
                         .param("startTime", startTime.toString())
-                        .param("endTime", endTime.toString()))
+                        .param("numSlots", numSlots))
                 .andExpect(status().isOk());
 
         // verify that reservation was updated
-        verify(reservationService).updateReservation(reservationId, startTime, endTime);
+        verify(reservationService).updateReservation(reservationId, startTime, 3);
     }
 }
