@@ -8,14 +8,14 @@ public class ReservationDTO {
     // TODO: generate reservation Id randomly
     private Long reservationId;
     private Long clientId;
-    private Long customerId;
+    private Long userId;
     private LocalDateTime startTime;
     private Integer numSlots;
     private Map<String, String> customValues;
 
-    public ReservationDTO(Long clientId, Long customerId, LocalDateTime startTime, Integer numSlots, Map<String, String> customValues) {
+    public ReservationDTO(Long clientId, Long userId, LocalDateTime startTime, Integer numSlots, Map<String, String> customValues) {
         this.clientId = clientId;
-        this.customerId = customerId;
+        this.userId = userId;
         this.startTime = startTime;
         this.numSlots = numSlots;
         this.customValues = customValues;
@@ -37,12 +37,12 @@ public class ReservationDTO {
         this.clientId = clientId;
     }
 
-    public Long getCustomerId() {
-        return customerId;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public LocalDateTime getStartTime() {

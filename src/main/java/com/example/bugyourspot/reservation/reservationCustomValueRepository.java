@@ -1,4 +1,4 @@
-package temp;
+package com.example.bugyourspot.reservation;
 
 import com.example.bugyourspot.reservation.Attribute;
 import org.springframework.data.jpa.repository.JpaRepository;

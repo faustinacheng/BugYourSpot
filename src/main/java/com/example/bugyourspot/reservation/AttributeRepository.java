@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface AttributeRepository extends JpaRepository<Attribute, Long> {
 
     @Query("SELECT a FROM Attribute a WHERE a.clientId = ?1 AND a.label = ?2")
-    Attribute findAttributeByClientAndTitle (long clientId, String label);
+    Attribute findAttributeByClientAndTitle (Long clientId, String label);
+
+    java.util.List<Attribute> findByClientId(Long clientId);
 }
 

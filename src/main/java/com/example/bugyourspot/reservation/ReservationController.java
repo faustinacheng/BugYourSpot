@@ -1,9 +1,5 @@
 package com.example.bugyourspot.reservation;
-import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -21,23 +17,35 @@ public class ReservationController {
     }
 
     @RequestMapping(
-            value = "/createReservationSchema",
+            value = "/createClient",
             method = RequestMethod.POST)
-    public void createReservationSchema (@RequestBody ReservationSchema reservationSchema) {
-        reservationService.createReservationSchema(reservationSchema);
+    public void createClient (@RequestBody ClientDTO clientDTO) {
+        reservationService.createClient(clientDTO);
     }
 
     @RequestMapping(
-            value = "/getReservationSchemas",
+            value = "/getClients",
             method = RequestMethod.GET)
-    public List<ReservationSchema> getReservationSchemas() {
-        return reservationService.getReservationSchemas();
+    public List<Client> getClients() {
+        return reservationService.getClients();
+    }
+
+//    @RequestMapping(
+//            value = "/getClientReservations",
+//            method = RequestMethod.GET)
+//    @ResponseBody
+//    public List<Reservation> getClientReservations(@RequestParam Long clientId) {
+//        return reservationService.getClientReservations(clientId);
+//    }
+
+    @GetMapping("/getClientReservations")
+    public List<Map<String, String>> getClientReservations(@RequestParam("clientId") Long clientId) {
+        return reservationService.getClientReservations(clientId);
     }
 
     @PostMapping
-    public void createReservation (@RequestBody ReservationDTO reservationDto) {
-        // TODO: change parameter to ReservationDTO, pass Reservation and ReservationCustomValue to reservationService
-        reservationService.addNewReservation(reservationDto);
+    public void createReservation(@RequestBody ReservationDTO reservationDto) {
+        reservationService.createReservation(reservationDto);
     }
 
     @DeleteMapping(path = "{reservationId}")

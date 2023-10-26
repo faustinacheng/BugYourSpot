@@ -1,7 +1,7 @@
 package com.example.bugyourspot;
 
 import com.example.bugyourspot.reservation.ReservationRepository;
-import com.example.bugyourspot.reservation.ReservationSchemaRepository;
+import com.example.bugyourspot.reservation.ClientRepository;
 import com.example.bugyourspot.reservation.AttributeRepository;
 import com.example.bugyourspot.reservation.ReservationService;
 import com.example.bugyourspot.reservation.Reservation;
@@ -21,7 +21,7 @@ public class ReservationServiceTest {
 
     @Mock
     private ReservationRepository reservationRepository;
-    private ReservationSchemaRepository reservationSchemaRepository;
+    private ClientRepository reservationSchemaRepository;
     private AttributeRepository attributeRepository;
     private ReservationService reservationService;
     private Reservation reservation;

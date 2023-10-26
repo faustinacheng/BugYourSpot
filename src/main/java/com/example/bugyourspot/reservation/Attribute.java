@@ -2,6 +2,7 @@ package com.example.bugyourspot.reservation;
 import jakarta.persistence.*;
 
 @Entity
+@Table
 public class Attribute {
 
     @Id
@@ -27,16 +28,32 @@ public class Attribute {
         return attributeId;
     }
 
-    public Long getClient() {
+    public void setAttributeId(Long attributeId) {
+        this.attributeId = attributeId;
+    }
+
+    public Long getClientId() {
         return clientId;
+    }
+
+    public void setClientId(Long clientId) {
+        this.clientId = clientId;
     }
 
     public String getLabel() {
         return label;
     }
 
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
     public String getDataType() {
         return dataType;
+    }
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
     }
 }
 
