@@ -20,25 +20,24 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
-    @GetMapping
-    public List<Reservation> getReservations() {
-        return reservationService.getReservations();
-    }
-
-//    @PostMapping
     @RequestMapping(
             value = "/createReservationSchema",
             method = RequestMethod.POST)
     public void createReservationSchema (@RequestBody ReservationSchema reservationSchema) {
         reservationService.createReservationSchema(reservationSchema);
-//        reservationService.addNewReservationSchema(reservationSchema);
+    }
+
+    @RequestMapping(
+            value = "/getReservationSchemas",
+            method = RequestMethod.GET)
+    public List<ReservationSchema> getReservationSchemas() {
+        return reservationService.getReservationSchemas();
     }
 
     @PostMapping
-    public void createReservation (@RequestBody Reservation reservation) {
+    public void createReservation (@RequestBody ReservationDTO reservationDto) {
         // TODO: change parameter to ReservationDTO, pass Reservation and ReservationCustomValue to reservationService
-
-        reservationService.addNewReservation(reservation);
+        reservationService.addNewReservation(reservationDto);
     }
 
     @DeleteMapping(path = "{reservationId}")
@@ -53,5 +52,10 @@ public class ReservationController {
             @RequestParam(required = false) Integer numSlots
     ) {
         reservationService.updateReservation(reservationId, startTime, numSlots);
+    }
+
+    @GetMapping
+    public List<Reservation> getReservations() {
+        return reservationService.getReservations();
     }
 }

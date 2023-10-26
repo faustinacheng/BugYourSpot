@@ -3,6 +3,7 @@ package com.example.bugyourspot.reservation;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table
@@ -24,10 +25,11 @@ public class Reservation {
     private LocalDateTime startTime;
     private Integer numSlots;
 
-    // TODO: store custom values in map?
 
     public Reservation(){
     }
+
+
 
     public Reservation(Long reservationId, Long clientId, Long customerId, LocalDateTime startTime, Integer numSlots) {
         this.reservationId = reservationId;

@@ -31,22 +31,6 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public void addNewReservation(Reservation reservation) {
-        Optional<Reservation> reservationOptional =
-                reservationRepository.findReservationByClientId(reservation.getClientId());
-        if (reservationOptional.isPresent()) {
-            throw new IllegalStateException("client taken");
-        }
-
-        // TODO: save custom field values to reservationCustomValueRepository
-
-        reservationRepository.save(reservation);
-    }
-
-    public void addNewReservationSchema(ReservationSchema reservationSchema) {
-        reservationSchemaRepository.save(reservationSchema);
-    }
-
     public void createReservationSchema(ReservationSchema reservationSchema) {
         reservationSchemaRepository.save(reservationSchema);
 
@@ -72,8 +56,43 @@ public class ReservationService {
             Attribute attribute = new Attribute(clientId, attributeName, attributeType);
             attributeRepository.save(attribute);
         }
-
     }
+
+    public List<ReservationSchema> getReservationSchemas () {
+        return reservationSchemaRepository.findAll();
+    }
+
+    public void addNewReservation(ReservationDTO reservationDto) {
+        Long reservationId = reservationDto.getReservationId();
+        Long clientId = reservationDto.getClientId();
+        Long customerId = reservationDto.getCustomerId();
+        LocalDateTime startTime = reservationDto.getStartTime();
+        Integer numSlots = reservationDto.getNumSlots();
+
+        Map<String, String> customAttributes = reservationDto.getCustomValues();
+
+        Reservation reservation = new Reservation(reservationId, clientId, customerId, startTime, numSlots);
+        reservationRepository.save(reservation);
+
+        for (String customAttribute : customAttributes.keySet()) {
+            String value = customAttributes.get(customAttribute);
+            Attribute attribute = attributeRepository.findAttributeByClientAndTitle(clientId, customAttribute);
+            if (attribute == null) {
+                throw new IllegalStateException("attribute does not exist");
+            }
+
+            // TODO: fix optional vs attribute
+
+            String type = attribute.getDataType();
+            Long attributeId = attribute.getAttributeId();
+
+
+
+
+
+        }
+    }
+
 
     public void deleteReservation(Long reservationId) {
         boolean exists = reservationRepository.existsById(reservationId);

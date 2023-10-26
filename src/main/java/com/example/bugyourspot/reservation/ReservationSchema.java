@@ -22,12 +22,12 @@ public class ReservationSchema {
     )
     private Long clientId;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "schema_fields",
-            joinColumns = @JoinColumn(name = "schema_id"))
-    @MapKeyColumn(name = "field_key")
-    @Column(name = "field_value")
-    private Map<String, String> fields = new HashMap<>();
+//    @ElementCollection(fetch = FetchType.EAGER)
+//    @CollectionTable(name = "schema_fields",
+//            joinColumns = @JoinColumn(name = "schema_id"))
+//    @MapKeyColumn(name = "field_key")
+//    @Column(name = "field_value")
+//    private Map<String, String> fields = new HashMap<>();
 
 
     public ReservationSchema() {
@@ -36,12 +36,12 @@ public class ReservationSchema {
 
     public ReservationSchema(Long clientId, Map<String, String> fields) {
         this.clientId = clientId;
-        this.fields = fields;
+//        this.fields = fields;
     }
 
-    public ReservationSchema(Map<String, String> fields) {
-        this.fields = fields;
-    }
+//    public ReservationSchema(Map<String, String> fields) {
+//        this.fields = fields;
+//    }
 
     public Long getClientId() {
         return clientId;
@@ -51,19 +51,18 @@ public class ReservationSchema {
         this.clientId = clientId;
     }
 
-    public Map<String, String> getFields() {
-        return fields;
-    }
+//    public Map<String, String> getFields() {
+//        return fields;
+//    }
 
-    public void setFields(Map<String, String> fields) {
-        this.fields = fields;
-    }
+//    public void setFields(Map<String, String> fields) {
+//        this.fields = fields;
+//    }
 
     @Override
     public String toString() {
         return "ReservationSchema{" +
                 "clientId=" + clientId +
-                ", fields=" + fields +
                 '}';
     }
 
