@@ -7,6 +7,7 @@ public class Attribute {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long attributeId;
+
     private Long clientId;
 
     private String label;

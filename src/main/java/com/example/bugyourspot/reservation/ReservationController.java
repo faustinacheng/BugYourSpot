@@ -1,5 +1,6 @@
 package com.example.bugyourspot.reservation;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
 import org.springframework.http.MediaType;
@@ -28,9 +29,9 @@ public class ReservationController {
     @RequestMapping(
             value = "/createReservationSchema",
             method = RequestMethod.POST)
-    public void createReservationSchema (@RequestBody Map<String, Object>[] schema) {
-        System.out.println(schema);
-        reservationService.createReservationSchema(schema);
+    public void createReservationSchema (@RequestBody ReservationSchema reservationSchema) {
+        reservationService.createReservationSchema(reservationSchema);
+//        reservationService.addNewReservationSchema(reservationSchema);
     }
 
     @PostMapping
