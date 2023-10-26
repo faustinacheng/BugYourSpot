@@ -34,9 +34,6 @@ public class ReservationControllerTest {
 
     @Test
     public void getReservations() throws Exception {
-        // mock getReservations() to return list containing just one reservation
-       //when(reservationService.getReservations()).thenReturn(Arrays.asList(reservation));
-
         // simulate client accessing this endpoint
         mockMvc.perform(get("/api/v1/reservation"));
         verify(reservationService).getReservations();
