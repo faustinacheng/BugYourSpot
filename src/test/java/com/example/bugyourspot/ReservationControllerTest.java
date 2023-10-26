@@ -2,6 +2,7 @@ package com.example.bugyourspot;
 import com.example.bugyourspot.reservation.Reservation;
 import com.example.bugyourspot.reservation.ReservationController;
 import com.example.bugyourspot.reservation.ReservationService;
+import com.example.bugyourspot.reservation.ReservationDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @WebMvcTest(ReservationController.class)
 public class ReservationControllerTest {
@@ -26,6 +28,8 @@ public class ReservationControllerTest {
     private Long clientId = 1L;
     private Long customerId = 1L;
     private Integer numSlots = 3;
+    private LocalDateTime startTime = LocalDateTime.now();
+    private Map<String, String> customValues = new HashMap<>();
 
     @BeforeEach
     public void setUp() {
@@ -41,7 +45,8 @@ public class ReservationControllerTest {
 
     @Test
     public void createReservation() throws Exception {
-        doNothing().when(reservationService).addNewReservation(reservation);
+        ReservationDTO reservationDTO = new ReservationDTO(clientId, customerId, startTime, numSlots, customValues);
+        //doNothing().when(reservationService).createReservation(any(ReservationDTO.class));
 
         // actually add reservation
         mockMvc.perform(post("/api/v1/reservation")
@@ -50,7 +55,7 @@ public class ReservationControllerTest {
                 .andExpect(status().isOk());
 
         // verify that reservation was added
-        verify(reservationService).addNewReservation(any(Reservation.class));
+        verify(reservationService).createReservation(any(ReservationDTO.class));
     }
 
     @Test

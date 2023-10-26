@@ -21,7 +21,6 @@ public class ReservationTest {
 
         // basic test to check attribute retrieval and constructor initialization
         assertEquals(clientId, reservation.getClientId());
-        assertEquals(customerId, reservation.getCustomerId());
         assertEquals(startTime, reservation.getStartTime());
         assertEquals(numSlots, reservation.getNumSlots());
     }

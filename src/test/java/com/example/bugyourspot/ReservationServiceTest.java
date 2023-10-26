@@ -1,10 +1,6 @@
 package com.example.bugyourspot;
 
-import com.example.bugyourspot.reservation.ReservationRepository;
-import com.example.bugyourspot.reservation.ClientRepository;
-import com.example.bugyourspot.reservation.AttributeRepository;
-import com.example.bugyourspot.reservation.ReservationService;
-import com.example.bugyourspot.reservation.Reservation;
+import com.example.bugyourspot.reservation.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -15,15 +11,25 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
 
 public class ReservationServiceTest {
 
     @Mock
     private ReservationRepository reservationRepository;
-    private ClientRepository reservationSchemaRepository;
+    private ReservationDTO reservationDTO;
+    private ClientRepository clientRepository;
     private AttributeRepository attributeRepository;
     private ReservationService reservationService;
+    private VarcharTypeRepository varcharTypeRepository;
+    private DatetimeTypeRepository datetimeTypeRepository;
+    private DoubleTypeRepository doubleTypeRepository;
+    private IntegerTypeRepository integerTypeRepository;
+    private BooleanTypeRepository booleanTypeRepository;
+
     private Reservation reservation;
     private final Long clientId = 1L;
     private final Long customerId = 1L;
@@ -31,14 +37,17 @@ public class ReservationServiceTest {
     private final Long fakeId = 2L;
     private final Long realId = 1L;
     private final int numSlots = 2;
+    private final Map<String, String> customValues = new HashMap<>();
 
     private final LocalDateTime startTime = LocalDateTime.now();
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        reservationService = new ReservationService(reservationRepository, reservationSchemaRepository,
-                                attributeRepository);
+        reservationService = new ReservationService(reservationRepository, clientRepository,
+                attributeRepository, varcharTypeRepository, datetimeTypeRepository,  doubleTypeRepository,
+                integerTypeRepository, booleanTypeRepository);
+        reservationDTO = new ReservationDTO(clientId, customerId, startTime, numSlots, customValues);
         reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
     }
 
@@ -53,9 +62,9 @@ public class ReservationServiceTest {
 
     @Test
     public void addReservation() {
-        when(reservationRepository.findReservationByClientId(anyInt())).thenReturn(Optional.empty());
+        when(reservationRepository.findByClientId(anyLong())).thenReturn(new ArrayList<Reservation>());
 
-        reservationService.addNewReservation(reservation);
+        reservationService.createReservation(reservationDTO);
         //check if saved correctly
         verify(reservationRepository).save(reservation);
     }
@@ -63,7 +72,7 @@ public class ReservationServiceTest {
     @Test
     public void addClientTaken() {
         when(reservationRepository.save(any(Reservation.class))).thenThrow(new IllegalStateException());
-        assertThrows(IllegalStateException.class, () -> reservationService.addNewReservation(reservation));
+        assertThrows(IllegalStateException.class, () -> reservationService.createReservation(reservationDTO));
     }
 
     @Test
