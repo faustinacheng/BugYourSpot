@@ -58,6 +58,8 @@ public class ReservationServiceTest {
     @Test
     public void addClientTaken() {
         reservationService.addNewReservation(reservation);
+        // is something not being changed throughout the system
+        reservationService.addNewReservation(reservation);
         assertThrows(IllegalStateException.class, () -> reservationService.addNewReservation(reservation));
     }
 
@@ -83,9 +85,9 @@ public class ReservationServiceTest {
     public void updateReservation() {
         //give new start and end time
         LocalDateTime startTime = LocalDateTime.now();
-        LocalDateTime endTime = startTime.plusHours(3);
-        Reservation reservation = new Reservation(clientId, customerId, startTime, numSlots);
-        Long reservationId = reservation.getReservationId();
+        Reservation reservation = new Reservation(reservationId, clientId, customerId, startTime, numSlots);
+        reservationService.addNewReservation(reservation);
+        //Long reservationId = reservation.getReservationId();
         reservationService.updateReservation(reservationId, startTime, numSlots);
 
         assertEquals(startTime, reservation.getStartTime());

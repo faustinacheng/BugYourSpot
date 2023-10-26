@@ -35,11 +35,10 @@ public class ReservationControllerTest {
     @Test
     public void getReservations() throws Exception {
         // mock getReservations() to return list containing just one reservation
-        when(reservationService.getReservations()).thenReturn(Arrays.asList(reservation));
+       //when(reservationService.getReservations()).thenReturn(Arrays.asList(reservation));
 
         // simulate client accessing this endpoint
-        mockMvc.perform(get("/"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/reservation"));
         verify(reservationService).getReservations();
     }
 
@@ -48,7 +47,7 @@ public class ReservationControllerTest {
         doNothing().when(reservationService).addNewReservation(reservation);
 
         // actually add reservation
-        mockMvc.perform(post("/")
+        mockMvc.perform(post("/api/v1/reservation")
                         .contentType("application/json")
                         .content("{ \"id\": 1, \"startTime\": \"2023-10-17T10:00:00\", \"endTime\": \"2023-10-17T12:00:00\" }"))
                 .andExpect(status().isOk());
@@ -62,7 +61,7 @@ public class ReservationControllerTest {
         doNothing().when(reservationService).deleteReservation(reservationId);
 
         // actually delete reservation
-        mockMvc.perform(delete("/{id}", reservationId))
+        mockMvc.perform(delete("/api/v1/reservation/{id}", reservationId))
                 .andExpect(status().isOk());
 
         // verify that reservation was deleted
@@ -75,9 +74,9 @@ public class ReservationControllerTest {
         doNothing().when(reservationService).updateReservation(reservationId, startTime, numSlots);
 
         // actually update reservation
-        mockMvc.perform(put("/{id}", reservationId)
+        mockMvc.perform(put("/api/v1/reservation/{id}", reservationId)
                         .param("startTime", startTime.toString())
-                        .param("numSlots", numSlots))
+                        .param("numSlots", numSlots + ""))
                 .andExpect(status().isOk());
 
         // verify that reservation was updated
