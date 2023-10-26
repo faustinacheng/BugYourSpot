@@ -10,19 +10,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-//    private final CustomFieldRepository customFieldRepository;
-    // private final CustomFields customFields;
+    private final ReservationSchemaRepository reservationSchemaRepository;
+    private final AttributeRepository attributeRepository;
 
     @Autowired
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(ReservationRepository reservationRepository, ReservationSchemaRepository reservationSchemaRepository, AttributeRepository attributeRepository) {
         this.reservationRepository = reservationRepository;
-//        this.customFieldRepository = customFieldRepository;
-        // instantiate
+        this.reservationSchemaRepository = reservationSchemaRepository;
+        this.attributeRepository = attributeRepository;
     }
 
     @GetMapping
@@ -42,11 +43,36 @@ public class ReservationService {
         reservationRepository.save(reservation);
     }
 
-    public void createReservationSchema(Map<String, Object>[] schema) {
-        // TODO:
+    public void addNewReservationSchema(ReservationSchema reservationSchema) {
+        reservationSchemaRepository.save(reservationSchema);
+    }
 
-            // check if all required fields provided in schema with expected types
-            // update tables in CustomFieldRepository
+    public void createReservationSchema(ReservationSchema reservationSchema) {
+        reservationSchemaRepository.save(reservationSchema);
+
+        Long clientId = reservationSchema.getClientId();
+        Map<String, String> schema = reservationSchema.getFields();
+        Set<String> mandatoryFields = Set.of("startTime", "numSlots", "customerId");
+
+
+        // Loop through schema and ensure all mandatory fields are passed in
+        for (String mandatoryField : mandatoryFields) {
+            if (!schema.containsKey(mandatoryField)) {
+                // return an error back to the client
+                throw new IllegalStateException("Missing " + mandatoryField + " in Schema");
+            }
+        }
+
+        // Call AttributeRepository to add (value, type) to attributes table for each custom attribute
+        for (String attributeName : schema.keySet()) {
+            if (mandatoryFields.contains(attributeName)) continue;
+
+            String attributeType = schema.get(attributeName);
+            // randomly generate attributeId
+            Attribute attribute = new Attribute(clientId, attributeName, attributeType);
+            attributeRepository.save(attribute);
+        }
+
     }
 
     public void deleteReservation(Long reservationId) {
