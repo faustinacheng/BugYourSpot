@@ -172,6 +172,21 @@ public class ReservationService {
         if (!exists) {
             throw new IllegalStateException("reservation with id " + reservationId + " does not exist");
         }
+
+        Reservation reservation = reservationRepository.findByReservationId(reservationId);
+
+        // get the attributes associated with this reservation (based on which client it belongs to)
+        List<Attribute> attributes = attributeRepository.findByClientId(reservation.getClientId());
+        for (Attribute attribute: attributes){
+            String dataType = attribute.getDataType();
+            switch (dataType) {
+                case "DATETIME" -> datetimeTypeRepository.deleteById(reservationId);
+                case "VARCHAR" -> varcharTypeRepository.deleteById(reservationId);
+                case "INTEGER" -> integerTypeRepository.deleteById(reservationId);
+                case "BOOLEAN" -> booleanTypeRepository.deleteById(reservationId);
+                case "DOUBLE" -> doubleTypeRepository.deleteById(reservationId);
+            }
+        }
         reservationRepository.deleteById(reservationId);
     }
 
@@ -180,13 +195,30 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalStateException("reservation with id " + reservationId + " does not exist"));
 
+        Long clientId = reservation.getClientId();
+        List<Attribute> attributes = attributeRepository.findByClientId(clientId);
+        Long startTimeId = -1L;
+        Long numSlotsId = -1L;
+        for (Attribute attribute: attributes){
+            if (attribute.getLabel().equals("startTime")){
+                startTimeId = attribute.getAttributeId();
+            }
+            else if (attribute.getLabel().equals("numSlots")){
+                numSlotsId = attribute.getAttributeId();
+            }
+        }
+
         if (startTime != null && !Objects.equals(reservation.getStartTime(), startTime)) {
             // TODO: limit number of reservations per certain time slot
             reservation.setStartTime(startTime);
+            reservationRepository.updateStartTime(reservationId, startTime);
+            datetimeTypeRepository.updateField(reservationId, startTimeId, startTime);
         }
 
         if (numSlots != null && !Objects.equals(reservation.getNumSlots(), numSlots)) {
             reservation.setNumSlots(numSlots);
+            reservationRepository.updateNumSlots(reservationId, numSlots);
+            integerTypeRepository.updateField(reservationId, numSlotsId, numSlots);
         }
     }
 }
