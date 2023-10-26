@@ -2,18 +2,19 @@ package com.example.bugyourspot;
 
 import com.example.bugyourspot.reservation.Reservation;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.time.LocalDateTime;
 
-@SpringBootTest
 public class ReservationTest {
 
+    @Mock
     private final Long clientId = 1L;
     private final Long customerId = 1L;
     private final int numSlots = 3;
     private final LocalDateTime startTime = LocalDateTime.now();
-    private final LocalDateTime endTime = LocalDateTime.now().plusHours(2);
+
     @Test
     public void reservationProperties() {
         Reservation reservation = new Reservation(clientId, customerId, startTime, numSlots);
