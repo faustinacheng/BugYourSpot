@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table
 public class DatetimeType {
 
     @Id
@@ -28,20 +29,32 @@ public class DatetimeType {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Long getReservationId() {
         return reservationId;
+    }
+
+    public void setReservationId(Long reservationId) {
+        this.reservationId = reservationId;
     }
 
     public Long getAttributeId() {
         return attributeId;
     }
 
+    public void setAttributeId(Long attributeId) {
+        this.attributeId = attributeId;
+    }
+
     public LocalDateTime getValue() {
         return value;
     }
 
-    public void setValue(String value) {
-        this.value = LocalDateTime.parse(value);
+    public void setValue(LocalDateTime value) {
+        this.value = value;
     }
 }
 

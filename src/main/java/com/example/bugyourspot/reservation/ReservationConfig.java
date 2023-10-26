@@ -6,10 +6,12 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class ReservationConfig {
 
+    /*
     @Bean
     CommandLineRunner commandLineRunner(ReservationRepository repository) {
         return args -> {
@@ -33,4 +35,5 @@ public class ReservationConfig {
 
         };
     }
+    */
 }

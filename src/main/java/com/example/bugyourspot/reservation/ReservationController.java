@@ -1,9 +1,5 @@
 package com.example.bugyourspot.reservation;
-import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -20,25 +16,36 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
-    @GetMapping
-    public List<Reservation> getReservations() {
-        return reservationService.getReservations();
+    @RequestMapping(
+            value = "/createClient",
+            method = RequestMethod.POST)
+    public void createClient (@RequestBody ClientDTO clientDTO) {
+        reservationService.createClient(clientDTO);
     }
 
-//    @PostMapping
     @RequestMapping(
-            value = "/createReservationSchema",
-            method = RequestMethod.POST)
-    public void createReservationSchema (@RequestBody ReservationSchema reservationSchema) {
-        reservationService.createReservationSchema(reservationSchema);
-//        reservationService.addNewReservationSchema(reservationSchema);
+            value = "/getClients",
+            method = RequestMethod.GET)
+    public List<Client> getClients() {
+        return reservationService.getClients();
+    }
+
+//    @RequestMapping(
+//            value = "/getClientReservations",
+//            method = RequestMethod.GET)
+//    @ResponseBody
+//    public List<Reservation> getClientReservations(@RequestParam Long clientId) {
+//        return reservationService.getClientReservations(clientId);
+//    }
+
+    @GetMapping("/getClientReservations")
+    public List<Map<String, String>> getClientReservations(@RequestParam("clientId") Long clientId) {
+        return reservationService.getClientReservations(clientId);
     }
 
     @PostMapping
-    public void createReservation (@RequestBody Reservation reservation) {
-        // TODO: change parameter to ReservationDTO, pass Reservation and ReservationCustomValue to reservationService
-
-        reservationService.addNewReservation(reservation);
+    public void createReservation(@RequestBody ReservationDTO reservationDto) {
+        reservationService.createReservation(reservationDto);
     }
 
     @DeleteMapping(path = "{reservationId}")
@@ -53,5 +60,10 @@ public class ReservationController {
             @RequestParam(required = false) Integer numSlots
     ) {
         reservationService.updateReservation(reservationId, startTime, numSlots);
+    }
+
+    @GetMapping
+    public List<Reservation> getReservations() {
+        return reservationService.getReservations();
     }
 }
