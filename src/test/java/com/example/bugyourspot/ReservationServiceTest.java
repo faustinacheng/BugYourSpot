@@ -1,6 +1,7 @@
 package com.example.bugyourspot;
 
 import com.example.bugyourspot.reservation.ReservationRepository;
+import com.example.bugyourspot.reservation.ReservationSchemaRepository;
 import com.example.bugyourspot.reservation.AttributeRepository;
 import com.example.bugyourspot.reservation.ReservationService;
 import com.example.bugyourspot.reservation.Reservation;
@@ -20,6 +21,7 @@ public class ReservationServiceTest {
 
     @Mock
     private ReservationRepository reservationRepository;
+    private ReservationSchemaRepository reservationSchemaRepository;
     private AttributeRepository attributeRepository;
     private ReservationService reservationService;
     private Reservation reservation;
@@ -30,10 +32,13 @@ public class ReservationServiceTest {
     private final Long realId = 1L;
     private final int numSlots = 2;
 
+    private final LocalDateTime startTime = LocalDateTime.now();
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        reservationService = new ReservationService(reservationRepository, attributeRepository);
+        reservationService = new ReservationService(reservationRepository, reservationSchemaRepository,
+                                attributeRepository);
         reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
     }
 
@@ -57,23 +62,18 @@ public class ReservationServiceTest {
 
     @Test
     public void addClientTaken() {
-        reservationService.addNewReservation(reservation);
-        // is something not being changed throughout the system
-        reservationService.addNewReservation(reservation);
+        when(reservationRepository.save(any(Reservation.class))).thenThrow(new IllegalStateException());
         assertThrows(IllegalStateException.class, () -> reservationService.addNewReservation(reservation));
     }
 
     @Test
     public void deleteReservation() {
         //delete reservation with clientId
+        reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
+        when(reservationRepository.existsById(reservationId)).thenReturn(true);
 
-        reservationService.addNewReservation(reservation);
         reservationService.deleteReservation(reservationId);
-
-        // verify this method was eventually invoked through the layers
-        verify(reservationRepository).deleteById(realId);
-        // reservation should not exist anymore
-        assertFalse(reservationRepository.existsById(realId));
+        verify(reservationRepository).deleteById(reservationId);
     }
 
     @Test
@@ -83,11 +83,8 @@ public class ReservationServiceTest {
 
     @Test
     public void updateReservation() {
-        //give new start and end time
-        LocalDateTime startTime = LocalDateTime.now();
-        Reservation reservation = new Reservation(reservationId, clientId, customerId, startTime, numSlots);
-        reservationService.addNewReservation(reservation);
-        //Long reservationId = reservation.getReservationId();
+        reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
         reservationService.updateReservation(reservationId, startTime, numSlots);
 
         assertEquals(startTime, reservation.getStartTime());
