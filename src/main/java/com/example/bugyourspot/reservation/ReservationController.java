@@ -59,6 +59,7 @@ public class ReservationController {
             @RequestParam(required = false) LocalDateTime startTime,
             @RequestParam(required = false) Integer numSlots
     ) {
+        //System.out.println(numSlots);
         reservationService.updateReservation(reservationId, startTime, numSlots);
     }
 

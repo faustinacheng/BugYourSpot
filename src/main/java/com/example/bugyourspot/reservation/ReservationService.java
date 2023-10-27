@@ -208,6 +208,8 @@ public class ReservationService {
             }
         }
 
+        numSlotsId = 3L;
+
         if (startTime != null && !Objects.equals(reservation.getStartTime(), startTime)) {
             // TODO: limit number of reservations per certain time slot
             reservation.setStartTime(startTime);

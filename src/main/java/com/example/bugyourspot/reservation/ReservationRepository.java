@@ -1,6 +1,7 @@
 package com.example.bugyourspot.reservation;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
@@ -15,9 +16,11 @@ public interface ReservationRepository
     @Query("SELECT r from Reservation r WHERE r.reservationId = ?1")
     Reservation findByReservationId(Long reservationId);
 
-    @Query("UPDATE Reservation r SET r.startTime = ?1 WHERE r.reservationId = ?1")
+    @Modifying
+    @Query("UPDATE Reservation r SET r.startTime = ?2 WHERE r.reservationId = ?1")
     void updateStartTime(Long reservationId, LocalDateTime newTime);
 
-    @Query("UPDATE Reservation r SET r.numSlots = ?1 WHERE r.reservationId = ?1")
+    @Modifying
+    @Query("UPDATE Reservation r SET r.numSlots = ?2 WHERE r.reservationId = ?1")
     void updateNumSlots(Long reservationId, int numSlots);
 }
