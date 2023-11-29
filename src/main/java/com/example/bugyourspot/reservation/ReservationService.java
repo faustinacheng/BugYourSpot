@@ -51,7 +51,7 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public void createClient(ClientDTO clientDTO) {
+    public Long createClient(ClientDTO clientDTO) {
         Client client = new Client();
         clientRepository.save(client);
         Long clientId = client.getClientId();
@@ -64,6 +64,8 @@ public class ReservationService {
             Attribute attribute = new Attribute(clientId, attributeName, attributeType);
             attributeRepository.save(attribute);
         }
+
+        return clientId;
     }
 
     public List<Client> getClients () {
