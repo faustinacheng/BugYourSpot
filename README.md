@@ -15,7 +15,8 @@ The ReservationService class acts as the next layer of logic, providing the meth
 `POST /reservations/createReservationSchema`\
 Description: Application provides certain fields that they want to represent a reservation with. This is in the form of a JSON object. The service validates these fields to ensure that it matches the expected format. Once validated, our service will dynamically generate the database schema based on the custom fields and their data types. Thus, this API should be called just once and before all other API calls.\
 Request Body: JSON object that represents the fields of a reservation\
-Example Usage: ```/createReservationSchema```
+Example Usage: `/createReservationSchema`
+
 1. Restaurant
 
 ```json
@@ -288,17 +289,18 @@ Possible statuses: “success”, “client not initialized”
   ]
 }
 ```
+
 # Tests
+
 Using JUnit + Mockito framework
+
 - Unit Tests:
-	- ```ReservationRepositoryTest.java```
-	- ```ReservationServiceTest.java```
-	- ```ReservationTest.java```
-- System Tests:
-	- ```ReservationControllerTest.java```
-	- Mock server-client communication over network (with localhost) using Intellij's HTTP Client Tool
-   	###
-Example System Test Run:
+  - `ReservationRepositoryTest.java`
+  - `ReservationServiceTest.java`
+  - `ReservationTest.java`
+- System Tests: - `ReservationControllerTest.java` - Mock server-client communication over network (with localhost) using Intellij's HTTP Client Tool ###
+  Example System Test Run:
+
 ```
 POST http://localhost:8080/api/v1/reservation
 Content-Type: application/json
@@ -328,7 +330,9 @@ PUT http://localhost:8080/api/v1/reservation/1?endTime=2022-10-14T17:05:59.50453
 ###
 POST http://localhost:8080/api/v1/reservation
 ```
+
 Example Failed Requests
+
 ```
 {
   "timestamp": "2023-10-14T20:43:11.124+00:00",
@@ -349,19 +353,26 @@ Example Failed Requests
 ```
 
 # Setting up Style Checker
+
 To set up pre commit hooks for linting: <br>
-```pip install pre-commit```\
-```pre-commit install```
+`pip install pre-commit`\
+`pre-commit install`
 
 Example Style Checker Reports:\
 ![](prettier_passed.png)
 ![](prettier_failed.png)
 
 # How to Build, Run, & Test
+
 - Currently: the PostgreSQL database is being hosted locally. Thus, end-to-end testing of this service can only be done on our local machines. We start up our database, use Maven to build the service, and execute all unit/system tests by manually running them in an IDE.
 - Next steps: use Docker to create container for application. From there, our client will be able to run an instance of our program on any machine, since the PostgreSQL database will be hosted on GCP. Further, we will set up a git pre-push hook to automatically run all unit and system tests upon pushing to the repo.
 
+# How to See Code Coverage
+
+`mvn clean test jacoco:report`\
+Then, open **../BugYourSpot/target/site/jacoco/com.example.bugyourspot.reservation/index.html**
+
 # Sources
+
 [Spring Boot Tutorial](https://www.youtube.com/watch?v=9SGDpanrc8U&t=1333s)\
 [EAV Explained](https://www.youtube.com/watch?v=9SGDpanrc8U&t=1333s)
-
