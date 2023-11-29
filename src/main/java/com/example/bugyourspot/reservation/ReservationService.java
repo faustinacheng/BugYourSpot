@@ -139,7 +139,13 @@ public class ReservationService {
         LocalDateTime startTime = reservationDTO.getStartTime();
         Integer numSlots = reservationDTO.getNumSlots();
         Reservation reservation = new Reservation(clientId, reservationDTO.getUserId(), startTime, numSlots);
+
+        int startTimeMins = startTime.toLocalTime().getMinute() ;
         LocalDateTime endTime = startTime.plusMinutes(slotLength * numSlots);
+
+        if (startTimeMins % slotLength != 0) {
+            throw new IllegalArgumentException("Reservation start time is not a multiple of slot length");
+        }
 
         if (startTime.toLocalTime().isBefore(client.getStartTime()) || endTime.toLocalTime().isAfter(client.getEndTime())) {
             throw new IllegalArgumentException("Reservation time is not within client's time range");
