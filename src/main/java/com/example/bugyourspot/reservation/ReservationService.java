@@ -81,7 +81,7 @@ public class ReservationService {
 
     public List<Map<String, String>> getClientReservations(Long clientId) {
         List<Map<String, String>> results = new ArrayList<>();
-        List<Reservation> reservations = reservationRepository.findReservationsByClientId(clientId);
+        List<Reservation> reservations = reservationRepository.findByClientId(clientId);
         List<Attribute> attributes = attributeRepository.findByClientId(clientId);
 
         for (Reservation reservation: reservations) {
@@ -159,7 +159,7 @@ public class ReservationService {
         }
 
         // Check that the time slots are not fully booked
-        List<Reservation> currentReservations = reservationRepository.findReservationsByClientId(clientId);
+        List<Reservation> currentReservations = reservationRepository.findByClientId(clientId);
 
         for (Reservation prevReservation: currentReservations) {
             LocalDateTime prevStartTime = prevReservation.getStartTime();
