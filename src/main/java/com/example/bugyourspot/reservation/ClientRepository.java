@@ -11,5 +11,5 @@ public interface ClientRepository
         extends JpaRepository<Client, Long> {
 
     @Query("SELECT c FROM Client c WHERE c.clientId = ?1")
-    Optional<Client> findReservationSchemaByClientId(Long clientId);
+    Client findReservationSchemaByClientId(Long clientId);
 }

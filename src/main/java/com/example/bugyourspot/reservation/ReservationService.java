@@ -2,11 +2,13 @@ package com.example.bugyourspot.reservation;
 
 import jakarta.transaction.Transactional;
 import org.aspectj.weaver.ast.Var;
+import org.checkerframework.checker.units.qual.s;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @Service
@@ -53,7 +55,14 @@ public class ReservationService {
 
     public void createClient(ClientDTO clientDTO) {
         Client client = new Client();
+        // check that start time < end time, start time greater than 0, reservationsPerSlot >
+        client.setStartTime(clientDTO.getStartTime());
+        client.setEndTime(clientDTO.getEndTime());
+        client.setSlotLength(clientDTO.getSlotLength());
+        client.setReservationsPerSlot(clientDTO.getReservationsPerSlot());
+
         clientRepository.save(client);
+        
         Long clientId = client.getClientId();
         Map<String, String> schema = clientDTO.getCustomValues();
 
@@ -72,7 +81,7 @@ public class ReservationService {
 
     public List<Map<String, String>> getClientReservations(Long clientId) {
         List<Map<String, String>> results = new ArrayList<>();
-        List<Reservation> reservations = reservationRepository.findByClientId(clientId);
+        List<Reservation> reservations = reservationRepository.findReservationsByClientId(clientId);
         List<Attribute> attributes = attributeRepository.findByClientId(clientId);
 
         for (Reservation reservation: reservations) {
@@ -120,16 +129,61 @@ public class ReservationService {
 
     @Transactional
     public void createReservation(ReservationDTO reservationDTO) {
+        // Get client reservation schema info
         Long clientId = reservationDTO.getClientId();
+        Client client = clientRepository.findReservationSchemaByClientId(clientId);
+        int slotLength = client.getSlotLength();
+        Integer reservationsPerSlot = client.getReservationsPerSlot();
 
-        // Save to reservation table
-        Reservation reservation = new Reservation(clientId, reservationDTO.getUserId(), reservationDTO.getStartTime(), reservationDTO.getNumSlots());
+        // Create reservation object
+        LocalDateTime startTime = reservationDTO.getStartTime();
+        Integer numSlots = reservationDTO.getNumSlots();
+        Reservation reservation = new Reservation(clientId, reservationDTO.getUserId(), startTime, numSlots);
+
+        int startTimeMins = startTime.toLocalTime().getMinute() ;
+        LocalDateTime endTime = startTime.plusMinutes(slotLength * numSlots);
+
+        if (startTimeMins % slotLength != 0) {
+            throw new IllegalArgumentException("Reservation start time is not a multiple of slot length");
+        }
+
+        if (startTime.toLocalTime().isBefore(client.getStartTime()) || endTime.toLocalTime().isAfter(client.getEndTime())) {
+            throw new IllegalArgumentException("Reservation time is not within client's time range");
+        }
+
+        // Track the number of reservations per requested time slot
+        Map<LocalDateTime, Integer> reservationsPerTimeSlot = new HashMap<>();
+        for (int i = 0; i < numSlots; i++) {
+            LocalDateTime slotStartTime = startTime.plusMinutes(slotLength * i);
+            reservationsPerTimeSlot.put(slotStartTime, 0);
+        }
+
+        // Check that the time slots are not fully booked
+        List<Reservation> currentReservations = reservationRepository.findReservationsByClientId(clientId);
+
+        for (Reservation prevReservation: currentReservations) {
+            LocalDateTime prevStartTime = prevReservation.getStartTime();
+            int prevNumSlots = prevReservation.getNumSlots();
+
+            for (int i = 0; i < prevNumSlots; i++) {
+                LocalDateTime slotStartTime = prevStartTime.plusMinutes(slotLength * i);
+
+                if (reservationsPerTimeSlot.containsKey(slotStartTime)) {
+                    reservationsPerTimeSlot.put(slotStartTime, reservationsPerTimeSlot.get(slotStartTime) + 1);
+
+                    if (reservationsPerTimeSlot.get(slotStartTime) == reservationsPerSlot) {
+                        throw new IllegalArgumentException("Reservation time slots are fully booked");
+                    }
+                }
+            }
+        }
+
+        // Reservation valid, save reservation and custom values
         reservationRepository.save(reservation);
 
         Long reservationId = reservation.getReservationId();
         Map<String, String> customValues = reservationDTO.getCustomValues();
 
-        // Handle customValues
         // TODO: validate all fields passed in
         List<Attribute> attributes = attributeRepository.findByClientId(clientId);
         for (Attribute attribute : attributes) {
@@ -167,6 +221,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteReservation(Long reservationId) {
         boolean exists = reservationRepository.existsById(reservationId);
         if (!exists) {
