@@ -1,6 +1,7 @@
 package com.example.bugyourspot.reservation;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import jakarta.persistence.*;
 
 @Entity
@@ -18,8 +19,8 @@ public class Client {
             generator = "client_sequence"
     )
     private Long clientId;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private int slotLength;
     private int reservationsPerSlot;
 
@@ -30,7 +31,7 @@ public class Client {
         this.clientId = clientId;
     }
     
-    public Client(LocalDateTime startTime, LocalDateTime endTime, int slotLength, int reservationsPerSlot) {
+    public Client(LocalTime startTime, LocalTime endTime, int slotLength, int reservationsPerSlot) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.slotLength = slotLength;
@@ -45,15 +46,15 @@ public class Client {
         this.clientId = clientId;
     }
 
-    public LocalDateTime getStartTime() {
+    public LocalTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
+    public void setStartTime(LocalTime startTime) {
         this.startTime = startTime;
     }
 
-    public LocalDateTime getEndTime() {
+    public LocalTime getEndTime() {
         return endTime;
     }
 
@@ -73,7 +74,7 @@ public class Client {
         this.reservationsPerSlot = reservationsPerSlot;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
+    public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
     }
 

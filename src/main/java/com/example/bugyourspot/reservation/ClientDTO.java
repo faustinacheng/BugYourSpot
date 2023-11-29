@@ -1,20 +1,20 @@
 package com.example.bugyourspot.reservation;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Map;
 
 public class ClientDTO {
 
     private Map<String, String> customValues;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private int slotLength;
     private int reservationsPerSlot;
 
     public ClientDTO() {
     }
 
-    public ClientDTO(Map<String, String> customValues, LocalDateTime startTime, LocalDateTime endTime, int slotLength, int reservationsPerSlot) {
+    public ClientDTO(Map<String, String> customValues, LocalTime startTime, LocalTime endTime, int slotLength, int reservationsPerSlot) {
         this.customValues = customValues;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -30,19 +30,19 @@ public class ClientDTO {
         this.customValues = customValues;
     }
 
-    public LocalDateTime getStartTime() {
+    public LocalTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
+    public void setStartTime(LocalTime startTime) {
         this.startTime = startTime;
     }
 
-    public LocalDateTime getEndTime() {
+    public LocalTime getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
+    public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
     }
 

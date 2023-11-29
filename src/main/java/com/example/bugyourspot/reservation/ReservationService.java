@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @Service
@@ -131,20 +132,20 @@ public class ReservationService {
         Long clientId = reservationDTO.getClientId();
         Client client = clientRepository.findReservationSchemaByClientId(clientId);
         int slotLength = client.getSlotLength();
+        Integer reservationsPerSlot = client.getReservationsPerSlot();
 
         LocalDateTime startTime = reservationDTO.getStartTime();
         Integer numSlots = reservationDTO.getNumSlots();
         LocalDateTime endTime = startTime.plusMinutes(slotLength * numSlots);
         Reservation reservation = new Reservation(clientId, reservationDTO.getUserId(), startTime, numSlots);
 
-        if (startTime.isBefore(client.getStartTime()) || endTime.isAfter(client.getEndTime())) {
+        if (startTime.toLocalTime().isBefore(client.getStartTime()) || endTime.toLocalTime().isAfter(client.getEndTime())) {
             throw new IllegalArgumentException("Reservation start time is not within client's time range");
         }
 
-        // Error check to ensure this reservation is valid and the time slots are not fully booked
+        // Check that the time slots are not fully booked
         List<Reservation> currentReservations = reservationRepository.findReservationsByClientId(clientId);
-        Integer reservationsPerSlot = client.getReservationsPerSlot();
-        // Integer count = 0;
+
         // Track the number of reservations per requested time slot
         Map<LocalDateTime, Integer> reservationsPerTimeSlot = new HashMap<>();
         for (int i = 0; i < numSlots; i++) {
@@ -169,34 +170,6 @@ public class ReservationService {
                 }
             }
         }
-
-        // for (Reservation prevReservation: currentReservations){
-        //     LocalDateTime prevStartTime = prevReservation.getStartTime();
-        //     LocalDateTime prevEndTime = prevStartTime.plusMinutes(slotLength * prevReservation.getNumSlots());
-
-        //     // // overlap 
-        //     // if (prevEndTime.isAfter(startTime) && prevStartTime.isBefore(endTime)){
-        //     //     count++;
-
-        //     //     if (count > reservationsPerSlot){
-        //     //         // throw error
-        //     //     }
-        //     // }
-            
-        //     // Check all the requested slots for a reservation to see if they are available
-        //     for (int i = 0; i < numSlots; i++) {
-        //         LocalDateTime slotStartTime = startTime.plusMinutes(slotLength * i);
-        //         LocalDateTime slotEndTime = slotStartTime.plusMinutes(slotLength);
-
-        //         if (slotEndTime.isAfter(prevStartTime) && slotStartTime.isBefore(prevEndTime)) {
-        //             count++;
-
-        //             if (count > reservationsPerSlot) {
-        //                 throw new IllegalArgumentException("Reservation time slots are fully booked");
-        //             }
-        //         }
-        //     }
-        // }
 
         // Save to reservation table
         reservationRepository.save(reservation);
