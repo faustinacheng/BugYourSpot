@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path = "api/v1/reservation")q
+@RequestMapping(path = "api/v1/reservation")
 public class ReservationController {
     private final ReservationService reservationService;
 
