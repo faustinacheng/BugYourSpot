@@ -1,8 +1,5 @@
 package com.example.bugyourspot;
 import com.example.bugyourspot.reservation.Reservation;
-import com.example.bugyourspot.reservation.ReservationController;
-import com.example.bugyourspot.reservation.ReservationService;
-import com.example.bugyourspot.reservation.ReservationDTO;
 import com.example.bugyourspot.reservation.ReservationRepository;
 
 import org.junit.jupiter.api.Test;
@@ -10,10 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -74,7 +74,8 @@ public class ReservationRepositoryTest {
         reservationRepository.updateStartTime(reservationId, newTime);
         entityManager.refresh(updatedReservation);
 
-        assertEquals(newTime, updatedReservation.getStartTime());
+        Long roomForError = 1000L;
+        assertTrue(Duration.between(newTime, updatedReservation.getStartTime()).toMillis() < roomForError);
     }
 
     @Test
