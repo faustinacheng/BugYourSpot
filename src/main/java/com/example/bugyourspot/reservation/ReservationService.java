@@ -69,7 +69,6 @@ public class ReservationService {
         // Call AttributeRepository to add (value, type) to attributes table for each custom attribute
         for (String attributeName : schema.keySet()) {
             String attributeType = schema.get(attributeName);
-            // randomly generate attributeId
             Attribute attribute = new Attribute(clientId, attributeName, attributeType);
             attributeRepository.save(attribute);
         }

@@ -41,7 +41,6 @@ public class ReservationRepositoryTest {
 
     @Test
     public void testFindByReservationId() {
-        // Create a sample reservation
         Reservation reservation = new Reservation();
         reservation.setClientId(2L);
         reservation.setStartTime(LocalDateTime.now());
