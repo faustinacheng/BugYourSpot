@@ -19,8 +19,8 @@ public class ReservationController {
     @RequestMapping(
             value = "/createClient",
             method = RequestMethod.POST)
-    public void createClient (@RequestBody ClientDTO clientDTO) {
-        reservationService.createClient(clientDTO);
+    public Long createClient (@RequestBody ClientDTO clientDTO) {
+        return reservationService.createClient(clientDTO);
     }
 
     @RequestMapping(

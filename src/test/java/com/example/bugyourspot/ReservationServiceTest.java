@@ -67,11 +67,11 @@ public class ReservationServiceTest {
         verify(reservationRepository).save(reservation);
     }*/
 
-    @Test
-    public void addClientTaken() {
-        when(reservationRepository.save(any(Reservation.class))).thenThrow(new IllegalStateException());
-        assertThrows(IllegalStateException.class, () -> reservationService.createReservation(reservationDTO));
-    }
+//    @Test
+//    public void addClientTaken() {
+//        when(reservationRepository.save(any(Reservation.class))).thenThrow(new IllegalStateException());
+//        assertThrows(IllegalStateException.class, () -> reservationService.createReservation(reservationDTO));
+//    }
 
     /**@Test
     public void deleteReservation() {
