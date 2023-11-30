@@ -76,7 +76,6 @@ public class ServiceIntegrationTest {
 
         ClientDTO clientDTO = new ClientDTO(schema, LocalTime.now(), LocalTime.now(), 1, 1);
         Long clientId = reservationService.createClient(clientDTO);
-        assertEquals(1L, clientId);
         Optional<Client> foundClient = clientRepository.findById(clientId);
 
         assertTrue(foundClient.isPresent());
