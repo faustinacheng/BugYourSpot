@@ -136,7 +136,7 @@ import java.util.Arrays;
          when(integerType.getValue()).thenReturn(1);
          when(booleanTypeRepository.findByReservationIdAndAttributeId(any(), any()))
                  .thenReturn(booleanType);
-         when(booleanType.getValue()).thenReturn(true);
+         when(booleanType.getValue()).thenReturn(false);
 
          List<Map<String, String>> allReservations = reservationService.getClientReservations(1L);
          assertEquals(1, allReservations.size());
@@ -374,38 +374,42 @@ import java.util.Arrays;
         assertThrows(IllegalArgumentException.class, () -> reservationService.createReservation(reservationDTO));
     }
 
-//     @Test
-//     public void testUpdateReservation_withVariousAttributes() {
-//         // Arrange
-//         Long reservationId = 1L;
-//         LocalDateTime startTime = LocalDateTime.now();
-//         Integer numSlots = 5;
-//
-//         ArrayList<Attribute> clientAttributes = new ArrayList<>();
-//         Attribute doubleAttribute = new Attribute(1L, "Time", "DOUBLE");
-//         Attribute datetimeAttribute = new Attribute(2L, "startTime", "DATETIME");
-//         Attribute varcharAttribute = new Attribute(3L, "Time", "VARCHAR");
-//         Attribute integerAttribute = new Attribute(4L, "numSlots", "INTEGER");
-//         Attribute booleanAttribute = new Attribute(5L, "Time", "BOOLEAN");
-//         clientAttributes.add(doubleAttribute);
-//         clientAttributes.add(datetimeAttribute);
-//         clientAttributes.add(varcharAttribute);
-//         clientAttributes.add(integerAttribute);
-//         clientAttributes.add(booleanAttribute);
-//
-//         Reservation reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
-//         Attribute attribute = mock(Attribute.class);
-//         reservation.setStartTime(startTime);
-//         reservation.setNumSlots(numSlots);
-//         when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
-//         when(attributeRepository.findByClientId(anyLong())).thenReturn(clientAttributes);
-//         reservationService.updateReservation(reservationId, startTime, numSlots);
-//
-//         verify(attribute).getAttributeId();
-//     }
+     @Test
+     public void testUpdateReservation_withVariousAttributes() {
+         // Arrange
+         Long reservationId = 1L;
+         LocalDateTime startTime = LocalDateTime.now();
+         Integer numSlots = 5;
 
-     /**
-      *
-      * INTEGRATION TESTS
-      */
+         ArrayList<Attribute> clientAttributes = new ArrayList<>();
+         Attribute doubleAttribute = mock(Attribute.class);
+         Attribute datetimeAttribute = mock(Attribute.class);
+         Attribute varcharAttribute = mock(Attribute.class);
+         Attribute integerAttribute = mock(Attribute.class);
+         Attribute booleanAttribute = mock(Attribute.class);
+         when(doubleAttribute.getLabel()).thenReturn("Time");
+         when(datetimeAttribute.getLabel()).thenReturn("startTime");
+         when(varcharAttribute.getLabel()).thenReturn("Time");
+         when(integerAttribute.getLabel()).thenReturn("numSlots");
+         when(booleanAttribute.getLabel()).thenReturn("Time");
+
+         clientAttributes.add(doubleAttribute);
+         clientAttributes.add(datetimeAttribute);
+         clientAttributes.add(varcharAttribute);
+         clientAttributes.add(integerAttribute);
+         clientAttributes.add(booleanAttribute);
+
+         Reservation reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
+         reservation.setStartTime(startTime);
+         reservation.setNumSlots(numSlots);
+         when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
+         when(attributeRepository.findByClientId(reservation.getClientId())).thenReturn(clientAttributes);
+         reservationService.updateReservation(reservationId, startTime, numSlots);
+
+         verify(doubleAttribute, times(2)).getLabel();
+         verify(datetimeAttribute, times(1)).getLabel();
+         verify(varcharAttribute, times(2)).getLabel();
+         verify(integerAttribute, times(2)).getLabel();
+         verify(booleanAttribute, times(2)).getLabel();
+     }
  }
