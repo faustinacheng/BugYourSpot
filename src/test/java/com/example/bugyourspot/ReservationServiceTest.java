@@ -9,7 +9,8 @@ import com.example.bugyourspot.reservation.*;
  import static org.junit.jupiter.api.Assertions.*;
  import static org.mockito.ArgumentMatchers.anyLong;
  import java.time.LocalDateTime;
- import java.util.Arrays;
+import java.time.LocalTime;
+import java.util.Arrays;
  import java.util.List;
  import java.util.ArrayList;
  import java.util.Optional;
@@ -21,6 +22,7 @@ import com.example.bugyourspot.reservation.*;
      @Mock
      private ReservationRepository reservationRepository;
      private ReservationDTO reservationDTO;
+     @Mock
      private ClientRepository clientRepository;
      @Mock
      private AttributeRepository attributeRepository;
@@ -43,6 +45,8 @@ import com.example.bugyourspot.reservation.*;
      private BooleanTypeRepository booleanTypeRepository;
 
      private Reservation reservation;
+     @Mock
+     private Client client;
      private final Long clientId = 1L;
      private final Long customerId = 1L;
      private final Long reservationId = 0L;
@@ -68,6 +72,19 @@ import com.example.bugyourspot.reservation.*;
 
          List<Reservation> result = reservationService.getReservations();
          assertEquals(reservation, result.get(0));
+     }
+
+     @Test
+     public void createClient(){
+         Client client = new Client();
+         HashMap<String, String> schema = new HashMap<>();
+         schema.put("key", "value");
+
+         ClientDTO clientDTO = new ClientDTO(schema, LocalTime.now(), LocalTime.now(), 1, 1);
+         //when(clientRepository.save(any(Client.class))).thenReturn(client);
+         //when(attributeRepository.save(any(Attribute.class))).thenReturn(mock(Attribute.class));
+         Long clientID = reservationService.createClient(clientDTO);
+         verify(attributeRepository).save(any(Attribute.class));
      }
 
      @Test
@@ -126,33 +143,31 @@ import com.example.bugyourspot.reservation.*;
          assertEquals(1, allReservations.size());
      }
 
-//     @Test
-//     public void addReservation() {
-//         reservationService.createReservation(reservationDTO);
-//         //check if saved correctly
-//         verify(reservationRepository).save(reservation);
-//     }
-
-//     @Test
-//     public void addClientTaken() {
-//         when(reservationRepository.save(any(Reservation.class))).thenThrow(new IllegalStateException());
-//         assertThrows(IllegalStateException.class, () -> reservationService.createReservation(reservationDTO));
-//     }
-
-     /**@Test
+     @Test
      public void deleteReservation() {
-         //delete reservation with clientId
-         reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
-         when(reservationRepository.existsById(anyLong())).thenReturn(true);
-         when(reservationRepository.findByReservationId(reservationId)).thenReturn(reservation);
+         ArrayList<Attribute> attributes = new ArrayList<>();
+         Attribute doubleAttribute = new Attribute(1L, "Time", "DOUBLE");
+         Attribute datetimeAttribute = new Attribute(1L, "Time", "DATETIME");
+         Attribute varcharAttribute = new Attribute(1L, "Time", "VARCHAR");
+         Attribute integerAttribute = new Attribute(1L, "Time", "INTEGER");
+         Attribute booleanAttribute = new Attribute(1L, "Time", "BOOLEAN");
+         attributes.add(doubleAttribute);
+         attributes.add(datetimeAttribute);
+         attributes.add(varcharAttribute);
+         attributes.add(integerAttribute);
+         attributes.add(booleanAttribute);
 
-         attributeRepository = Mockito.mock(AttributeRepository.class);
-         when(attributeRepository.findByClientId(anyLong())).thenReturn(new ArrayList<Attribute>());
-         doNothing().when(reservationRepository).deleteById(anyLong());
-
+         when(reservationRepository.existsById(reservationId)).thenReturn(true);
+         when(reservationRepository.findByReservationId(reservationId)).thenReturn(new Reservation());
+         when(attributeRepository.findByClientId(anyLong())).thenReturn(attributes);
          reservationService.deleteReservation(reservationId);
-         verify(reservationRepository).deleteById(reservationId);
-     }*/
+
+         verify(reservationRepository).existsById(anyLong());
+         verify(reservationRepository).findByReservationId(anyLong());
+//         verify(attributeRepository).findByClientId(anyLong());
+//         verify(datetimeTypeRepository).deleteById(anyLong());
+//         verify(varcharTypeRepository).deleteById(anyLong());
+     }
 
      @Test
      public void deleteNonExistentReservation() {
