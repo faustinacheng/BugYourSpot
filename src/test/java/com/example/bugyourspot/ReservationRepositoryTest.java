@@ -25,6 +25,7 @@ public class ReservationRepositoryTest {
     @Autowired
     private TestEntityManager entityManager;
 
+
     @Test
     public void testFindReservationsByClientId() {
         Reservation reservation = new Reservation();

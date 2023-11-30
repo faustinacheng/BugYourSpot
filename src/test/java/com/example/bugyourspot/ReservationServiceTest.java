@@ -3,8 +3,12 @@ import com.example.bugyourspot.reservation.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import static org.mockito.Mockito.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,7 +76,6 @@ import java.util.Arrays;
 
      @Test
      public void createClient(){
-         Client client = new Client();
          HashMap<String, String> schema = new HashMap<>();
          schema.put("key", "value");
 
@@ -400,4 +403,9 @@ import java.util.Arrays;
 //
 //         verify(attribute).getAttributeId();
 //     }
-}
+
+     /**
+      *
+      * INTEGRATION TESTS
+      */
+ }
