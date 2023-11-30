@@ -53,7 +53,7 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public void createClient(ClientDTO clientDTO) {
+    public Long createClient(ClientDTO clientDTO) {
         Client client = new Client();
         // check that start time < end time, start time greater than 0, reservationsPerSlot >
         client.setStartTime(clientDTO.getStartTime());
@@ -73,6 +73,8 @@ public class ReservationService {
             Attribute attribute = new Attribute(clientId, attributeName, attributeType);
             attributeRepository.save(attribute);
         }
+
+        return clientId;
     }
 
     public List<Client> getClients () {
