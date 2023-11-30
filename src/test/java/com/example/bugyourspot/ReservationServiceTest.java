@@ -183,6 +183,49 @@ import com.example.bugyourspot.reservation.*;
          assertThrows(IllegalStateException.class, () -> reservationService.updateReservation(1L,
                                                              LocalDateTime.now(), numSlots));
      }
+
+    @Test
+    public void testUpdateReservation_withStartTimeChange() {
+        Long reservationId = 1L;
+        LocalDateTime startTime = LocalDateTime.now();
+        Reservation reservation = new Reservation();
+        reservation.setStartTime(startTime.plusHours(1)); // Different start time
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+
+        reservationService.updateReservation(reservationId, startTime, null);
+        verify(reservationRepository).updateStartTime(eq(reservationId), eq(startTime));
+        verify(datetimeTypeRepository).updateField(eq(reservationId), anyLong(), eq(startTime));
+    }
+
+    @Test
+    public void testUpdateReservation_withNumSlotsChange() {
+        Long reservationId = 1L;
+        Integer numSlots = 5;
+        Reservation reservation = new Reservation();
+        reservation.setNumSlots(numSlots + 1); // Different numSlots
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+
+        reservationService.updateReservation(reservationId, null, numSlots);
+        verify(reservationRepository).updateNumSlots(eq(reservationId), eq(numSlots));
+        verify(integerTypeRepository).updateField(eq(reservationId), anyLong(), eq(numSlots));
+    }
+
+    @Test
+    public void testUpdateReservation_withNoChange() {
+        Long reservationId = 1L;
+        LocalDateTime startTime = LocalDateTime.now();
+        Integer numSlots = 5;
+        Reservation reservation = new Reservation();
+        reservation.setStartTime(startTime);
+        reservation.setNumSlots(numSlots);
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+
+        reservationService.updateReservation(reservationId, startTime, numSlots);
+        verify(reservationRepository, never()).updateStartTime(anyLong(), any());
+        verify(reservationRepository, never()).updateNumSlots(anyLong(), anyInt());
+        verify(datetimeTypeRepository, never()).updateField(anyLong(), anyLong(), any());
+        verify(integerTypeRepository, never()).updateField(anyLong(), anyLong(), anyInt());
+    }
  }
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
