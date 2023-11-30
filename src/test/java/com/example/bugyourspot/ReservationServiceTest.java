@@ -145,28 +145,35 @@ import java.util.Arrays;
 
      @Test
      public void deleteReservation() {
-         ArrayList<Attribute> attributes = new ArrayList<>();
+         Reservation reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
+         ArrayList<Attribute> clientAttributes = new ArrayList<Attribute>();
          Attribute doubleAttribute = new Attribute(1L, "Time", "DOUBLE");
          Attribute datetimeAttribute = new Attribute(1L, "Time", "DATETIME");
          Attribute varcharAttribute = new Attribute(1L, "Time", "VARCHAR");
          Attribute integerAttribute = new Attribute(1L, "Time", "INTEGER");
          Attribute booleanAttribute = new Attribute(1L, "Time", "BOOLEAN");
-         attributes.add(doubleAttribute);
-         attributes.add(datetimeAttribute);
-         attributes.add(varcharAttribute);
-         attributes.add(integerAttribute);
-         attributes.add(booleanAttribute);
+         clientAttributes.add(doubleAttribute);
+         clientAttributes.add(datetimeAttribute);
+         clientAttributes.add(varcharAttribute);
+         clientAttributes.add(integerAttribute);
+         clientAttributes.add(booleanAttribute);
 
-         when(reservationRepository.existsById(reservationId)).thenReturn(true);
-         when(reservationRepository.findByReservationId(reservationId)).thenReturn(new Reservation());
-         when(attributeRepository.findByClientId(anyLong())).thenReturn(attributes);
-         reservationService.deleteReservation(reservationId);
+         when(reservationRepository.existsById(anyLong())).thenReturn(true);
+         when(reservationRepository.findByReservationId(anyLong())).thenReturn(reservation);
+         when(attributeRepository.findByClientId(anyLong())).thenReturn(clientAttributes);
+         doNothing().when(datetimeTypeRepository).deleteById(anyLong());
+         doNothing().when(varcharTypeRepository).deleteById(anyLong());
+         doNothing().when(integerTypeRepository).deleteById(anyLong());
+         doNothing().when(booleanTypeRepository).deleteById(anyLong());
+         doNothing().when(doubleTypeRepository).deleteById(anyLong());
 
-         verify(reservationRepository).existsById(anyLong());
-         verify(reservationRepository).findByReservationId(anyLong());
-//         verify(attributeRepository).findByClientId(anyLong());
-//         verify(datetimeTypeRepository).deleteById(anyLong());
-//         verify(varcharTypeRepository).deleteById(anyLong());
+         reservationService.deleteReservation(1L);
+
+         verify(datetimeTypeRepository).deleteById(anyLong());
+         verify(varcharTypeRepository).deleteById(anyLong());
+         verify(integerTypeRepository).deleteById(anyLong());
+         verify(booleanTypeRepository).deleteById(anyLong());
+         verify(doubleTypeRepository).deleteById(anyLong());
      }
 
      @Test

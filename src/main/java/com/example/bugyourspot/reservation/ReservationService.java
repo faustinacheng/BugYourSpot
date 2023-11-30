@@ -185,7 +185,6 @@ public class ReservationService {
         Long reservationId = reservation.getReservationId();
         Map<String, String> customValues = reservationDTO.getCustomValues();
 
-        // TODO: validate all fields passed in
         List<Attribute> attributes = attributeRepository.findByClientId(clientId);
         for (Attribute attribute : attributes) {
             String label = attribute.getLabel();
@@ -232,9 +231,11 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findByReservationId(reservationId);
 
         // get the attributes associated with this reservation (based on which client it belongs to)
-        List<Attribute> attributes = attributeRepository.findByClientId(reservation.getClientId());
+        Long clientId = reservation.getClientId();
+        List<Attribute> attributes = attributeRepository.findByClientId(clientId);
         for (Attribute attribute: attributes){
             String dataType = attribute.getDataType();
+
             switch (dataType) {
                 case "DATETIME" -> datetimeTypeRepository.deleteById(reservationId);
                 case "VARCHAR" -> varcharTypeRepository.deleteById(reservationId);
