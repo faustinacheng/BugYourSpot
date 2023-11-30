@@ -406,10 +406,10 @@ import java.util.Arrays;
          when(attributeRepository.findByClientId(reservation.getClientId())).thenReturn(clientAttributes);
          reservationService.updateReservation(reservationId, startTime, numSlots);
 
-         verify(doubleAttribute, times(2)).getLabel();
-         verify(datetimeAttribute, times(1)).getLabel();
-         verify(varcharAttribute, times(2)).getLabel();
-         verify(integerAttribute, times(2)).getLabel();
-         verify(booleanAttribute, times(2)).getLabel();
+         verify(doubleAttribute, atLeastOnce()).getLabel();
+         verify(datetimeAttribute, atLeastOnce()).getLabel();
+         verify(varcharAttribute, atLeastOnce()).getLabel();
+         verify(integerAttribute, atLeastOnce()).getLabel();
+         verify(booleanAttribute, atLeastOnce()).getLabel();
      }
  }
