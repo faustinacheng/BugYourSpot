@@ -370,146 +370,34 @@ import java.util.Arrays;
 
         assertThrows(IllegalArgumentException.class, () -> reservationService.createReservation(reservationDTO));
     }
- }
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.Mock;
-//import org.mockito.MockitoAnnotations;
-//
-//import java.time.LocalDateTime;
-//import java.time.LocalTime;
-//import java.util.*;
-//
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.ArgumentMatchers.anyLong;
-//import static org.mockito.Mockito.*;
-//
-//public class ReservationServiceTest {
-//
-//    @Mock
-//    private ReservationRepository reservationRepository;
-//    private ReservationDTO reservationDTO;
-//    @Mock
-//    private ClientRepository clientRepository;
-//    @Mock
-//    private AttributeRepository attributeRepository;
-//    @Mock
-//    private VarcharTypeRepository varcharTypeRepository;
-//    @Mock
-//    private DatetimeTypeRepository datetimeTypeRepository;
-//    @Mock
-//    private DoubleTypeRepository doubleTypeRepository;
-//    @Mock
-//    private IntegerTypeRepository integerTypeRepository;
-//    @Mock
-//    private BooleanTypeRepository booleanTypeRepository;
-//
-//     private Reservation reservation;
-//     private final Long clientId = 1L;
-//     private final Long customerId = 1L;
-//     private final Long reservationId = 0L;
-//     private final Long fakeId = 2L;
-//     private final Long realId = 1L;
-//     private final int numSlots = 2;
-//     private final Map<String, String> customValues = new HashMap<>();
-//
-//     private final LocalDateTime startTime = LocalDateTime.now();
-//
-//    private ReservationService reservationService;
-//
-//    @BeforeEach
-//    public void setUp() {
-//        // MockitoAnnotations.initMocks(this);
-//        reservationService = new ReservationService(reservationRepository, clientRepository,
-//                attributeRepository, varcharTypeRepository, datetimeTypeRepository, doubleTypeRepository,
-//                integerTypeRepository, booleanTypeRepository);
-//        reservationDTO = new ReservationDTO(clientId, customerId, startTime, numSlots, customValues);
-//        reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
-//    }
-//
+
 //     @Test
-//     public void getReservations() {
-//         when(reservationRepository.findAll()).thenReturn(Arrays.asList(reservation));
+//     public void testUpdateReservation_withVariousAttributes() {
+//         // Arrange
+//         Long reservationId = 1L;
+//         LocalDateTime startTime = LocalDateTime.now();
+//         Integer numSlots = 5;
 //
-//         List<Reservation> result = reservationService.getReservations();
-//         //of all reservations, it should be first idx
-//         assertEquals(reservation, result.get(0));
+//         ArrayList<Attribute> clientAttributes = new ArrayList<>();
+//         Attribute doubleAttribute = new Attribute(1L, "Time", "DOUBLE");
+//         Attribute datetimeAttribute = new Attribute(2L, "startTime", "DATETIME");
+//         Attribute varcharAttribute = new Attribute(3L, "Time", "VARCHAR");
+//         Attribute integerAttribute = new Attribute(4L, "numSlots", "INTEGER");
+//         Attribute booleanAttribute = new Attribute(5L, "Time", "BOOLEAN");
+//         clientAttributes.add(doubleAttribute);
+//         clientAttributes.add(datetimeAttribute);
+//         clientAttributes.add(varcharAttribute);
+//         clientAttributes.add(integerAttribute);
+//         clientAttributes.add(booleanAttribute);
+//
+//         Reservation reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
+//         Attribute attribute = mock(Attribute.class);
+//         reservation.setStartTime(startTime);
+//         reservation.setNumSlots(numSlots);
+//         when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
+//         when(attributeRepository.findByClientId(anyLong())).thenReturn(clientAttributes);
+//         reservationService.updateReservation(reservationId, startTime, numSlots);
+//
+//         verify(attribute).getAttributeId();
 //     }
-//
-//    @Test
-//    public void testGetReservationsInvalidClient() {
-//        //Reservation reservation = new Reservation();
-//        when(reservationRepository.findByClientId(anyLong())).thenReturn(new ArrayList<Reservation>());
-//        when(attributeRepository.findByClientId(anyLong())).thenReturn(new ArrayList<Attribute>());
-//
-//        List<Reservation> result = reservationService.getReservations();
-//
-//        assertEquals(0, result.size());
-//    }
-//
-//    @Test
-//    public void testCreateClient() {
-//        // Arrange
-//        ClientDTO clientDTO = new ClientDTO();
-//        clientDTO.setStartTime(LocalTime.now());
-//        clientDTO.setEndTime(LocalTime.now().plusHours(1));
-//        clientDTO.setSlotLength(30);
-//        clientDTO.setReservationsPerSlot(2);
-//
-//        Client client = new Client();
-//        when(clientRepository.save(any(Client.class))).thenReturn(client);
-//        when(clientDTO.getCustomValues()).thenReturn(new HashMap<>());
-//        // Act
-//        reservationService.createClient(clientDTO);
-//
-//        // Assert
-//        verify(clientRepository).save(client);
-//        //verify(attributeRepository, times(clientDTO.getCustomValues().size())).save(any(Attribute.class));
-//    }
-//
-//    @Test
-//    public void testGetClients() {
-//        // Arrange
-//        List<Client> clients = Arrays.asList(new Client(), new Client());
-//        when(clientRepository.findAll()).thenReturn(clients);
-//
-//        // Act
-//        List<Client> result = reservationService.getClients();
-//
-//        // Assert
-//        assertEquals(clients.size(), result.size());
-//        assertEquals(clients, result);
-//    }
-//
-//    @Test
-//    public void testGetClientReservations() {
-//        // Arrange
-//        Long clientId = 1L;
-//        Reservation reservation = new Reservation();
-//        List<Reservation> reservations = Collections.singletonList(reservation);
-//        when(reservationRepository.findByClientId(clientId)).thenReturn(reservations);
-//
-//        Attribute attribute = new Attribute();
-//        List<Attribute> attributes = Collections.singletonList(attribute);
-//        when(attributeRepository.findByClientId(clientId)).thenReturn(attributes);
-//
-//        when(datetimeTypeRepository.findByReservationIdAndAttributeId(anyLong(), anyLong())).thenReturn(new DatetimeType());
-//        when(varcharTypeRepository.findByReservationIdAndAttributeId(anyLong(), anyLong())).thenReturn(new VarcharType());
-//        when(integerTypeRepository.findByReservationIdAndAttributeId(anyLong(), anyLong())).thenReturn(new IntegerType());
-//        when(booleanTypeRepository.findByReservationIdAndAttributeId(anyLong(), anyLong())).thenReturn(new BooleanType());
-//        when(doubleTypeRepository.findByReservationIdAndAttributeId(anyLong(), anyLong())).thenReturn(new DoubleType());
-//
-//        // Act
-//        List<Map<String, String>> result = reservationService.getClientReservations(clientId);
-//
-//        // Assert
-//        assertEquals(1, result.size());
-//        Map<String, String> entry = result.get(0);
-//        assertNotNull(entry.get("reservationId"));
-//        assertNotNull(entry.get("startTime"));
-//        assertNotNull(entry.get("numSlots"));
-//        assertNotNull(entry.get("clientId"));
-//        assertNotNull(entry.get("userId"));
-//    }
-//}
+}
