@@ -160,9 +160,9 @@ public class ReservationService {
         }
 
         // Check that the time slots are not fully booked
-        List<Reservation> currentReservations = reservationRepository.findByClientId(clientId);
+        List<Reservation> prevReservations = reservationRepository.findByClientId(clientId);
 
-        for (Reservation prevReservation: currentReservations) {
+        for (Reservation prevReservation: prevReservations) {
             LocalDateTime prevStartTime = prevReservation.getStartTime();
             int prevNumSlots = prevReservation.getNumSlots();
 
