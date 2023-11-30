@@ -25,18 +25,24 @@ import com.example.bugyourspot.reservation.*;
      @Mock
      private AttributeRepository attributeRepository;
      private ReservationService reservationService;
+     @Mock
      private VarcharTypeRepository varcharTypeRepository;
+     @Mock
      private DatetimeTypeRepository datetimeTypeRepository;
      @Mock
      private DoubleTypeRepository doubleTypeRepository;
+//     @Mock
+//     private DoubleType doubleType;
+//     @Mock
+//     private DatetimeType datetimeType;
+//     @Mock
+//     private VarcharType varcharType;
      @Mock
-     private DoubleType doubleType;
      private IntegerTypeRepository integerTypeRepository;
+     @Mock
      private BooleanTypeRepository booleanTypeRepository;
 
-
      private Reservation reservation;
-     private Attribute attribute;
      private final Long clientId = 1L;
      private final Long customerId = 1L;
      private final Long reservationId = 0L;
@@ -54,8 +60,6 @@ import com.example.bugyourspot.reservation.*;
                  attributeRepository, varcharTypeRepository, datetimeTypeRepository,  doubleTypeRepository,
                  integerTypeRepository, booleanTypeRepository);
          reservationDTO = new ReservationDTO(clientId, customerId, startTime, numSlots, customValues);
-         reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
-         attribute = new Attribute(1L, "Time", "DOUBLE");
      }
 
      @Test
@@ -77,17 +81,46 @@ import com.example.bugyourspot.reservation.*;
 
      @Test
      public void getExistingClientReservations(){
+         Reservation reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
          ArrayList<Reservation> clientReservations = new ArrayList<>();
          clientReservations.add(reservation);
 
          ArrayList<Attribute> clientAttributes = new ArrayList<>();
-         clientAttributes.add(attribute);
+         Attribute doubleAttribute = new Attribute(1L, "Time", "DOUBLE");
+         Attribute datetimeAttribute = new Attribute(1L, "Time", "DATETIME");
+         Attribute varcharAttribute = new Attribute(1L, "Time", "VARCHAR");
+         Attribute integerAttribute = new Attribute(1L, "Time", "INTEGER");
+         Attribute booleanAttribute = new Attribute(1L, "Time", "BOOLEAN");
+         clientAttributes.add(doubleAttribute);
+         clientAttributes.add(datetimeAttribute);
+         clientAttributes.add(varcharAttribute);
+         clientAttributes.add(integerAttribute);
+         clientAttributes.add(booleanAttribute);
+
+         DoubleType doubleType = mock(DoubleType.class);
+         DatetimeType datetimeType = mock(DatetimeType.class);
+         VarcharType varcharType = mock(VarcharType.class);
+         IntegerType integerType = mock(IntegerType.class);
+         BooleanType booleanType = mock(BooleanType.class);
+
          when(reservationRepository.findByClientId(anyLong())).thenReturn(clientReservations);
          when(attributeRepository.findByClientId(anyLong())).thenReturn(clientAttributes);
 
-         DoubleType value = new DoubleType(1L, 1L, "2");
          when(doubleTypeRepository.findByReservationIdAndAttributeId(any(), any()))
-                 .thenReturn(value);
+                 .thenReturn(doubleType);
+         when(doubleType.getValue()).thenReturn(2.0);
+         when(datetimeTypeRepository.findByReservationIdAndAttributeId(any(), any()))
+                 .thenReturn(datetimeType);
+         when(datetimeType.getValue()).thenReturn(LocalDateTime.now());
+         when(varcharTypeRepository.findByReservationIdAndAttributeId(any(), any()))
+                 .thenReturn(varcharType);
+         when(varcharType.getValue()).thenReturn("");
+         when(integerTypeRepository.findByReservationIdAndAttributeId(any(), any()))
+                 .thenReturn(integerType);
+         when(integerType.getValue()).thenReturn(1);
+         when(booleanTypeRepository.findByReservationIdAndAttributeId(any(), any()))
+                 .thenReturn(booleanType);
+         when(booleanType.getValue()).thenReturn(true);
 
          List<Map<String, String>> allReservations = reservationService.getClientReservations(1L);
          assertEquals(1, allReservations.size());
