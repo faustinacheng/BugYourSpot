@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 public class ReservationDTO {
-
-    // TODO: generate reservation Id randomly
     private Long reservationId;
     private Long clientId;
     private Long userId;

@@ -15,8 +15,10 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -90,6 +92,39 @@ public class ServiceIntegrationTest {
 
         Optional<Reservation> deletedReservation = reservationRepository.findById(reservationId);
         assertFalse(deletedReservation.isPresent());
+    }
+
+    @Test
+    public void testCreateReservation() {
+        HashMap<String, String> schema = new HashMap<>();
+        schema.put("key", "value");
+
+        ClientDTO clientDTO = new ClientDTO(schema, LocalTime.now().minusHours(5), LocalTime.now(), 1, 1);
+        Long clientId = reservationService.createClient(clientDTO);
+        ReservationDTO reservationDTO = new ReservationDTO(clientId, 1L, LocalDateTime.now().minusHours(2), numSlots, customValues);
+        reservationService.createReservation(reservationDTO);
+
+        List<Reservation> createdReservation = reservationRepository.findByClientId(clientId);
+        assertEquals(createdReservation.size(), 1);
+    }
+
+    @Test
+    public void testUpdateReservation() {
+        HashMap<String, String> schema = new HashMap<>();
+        schema.put("key", "value");
+
+        ClientDTO clientDTO = new ClientDTO(schema, LocalTime.now().minusHours(5), LocalTime.now(), 1, 1);
+        Long clientId = reservationService.createClient(clientDTO);
+        ReservationDTO reservationDTO = new ReservationDTO(clientId, 1L, LocalDateTime.now().minusHours(2), numSlots, customValues);
+        reservationService.createReservation(reservationDTO);
+
+        List<Reservation> reservations = reservationRepository.findByClientId(clientId);
+        assertEquals(reservations.size(), 1);
+        Reservation modifiedReservation =  reservations.get(0);
+        Long reservationId = modifiedReservation.getReservationId();
+
+        reservationService.updateReservation(reservationId, modifiedReservation.getStartTime(),3);
+        assertEquals(modifiedReservation.getNumSlots(), 3);
     }
 
 }
