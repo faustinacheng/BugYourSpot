@@ -97,10 +97,14 @@ public class ServiceIntegrationTest {
     public void testCreateReservation() {
         HashMap<String, String> schema = new HashMap<>();
         schema.put("key", "value");
+        LocalTime startTime = LocalTime.of(6, 0, 0);
+        LocalTime endTime = LocalTime.of(18, 0, 0);
 
-        ClientDTO clientDTO = new ClientDTO(schema, LocalTime.now().minusHours(5), LocalTime.now(), 1, 1);
+        ClientDTO clientDTO = new ClientDTO(schema, startTime, endTime, 1, 1);
         Long clientId = reservationService.createClient(clientDTO);
-        ReservationDTO reservationDTO = new ReservationDTO(clientId, 1L, LocalDateTime.now().minusHours(2), numSlots, customValues);
+
+        LocalDateTime reservationStartTime = LocalDateTime.of(2023, 11, 30, 12, 0, 0);
+        ReservationDTO reservationDTO = new ReservationDTO(clientId, 1L, reservationStartTime, numSlots, customValues);
         reservationService.createReservation(reservationDTO);
 
         List<Reservation> createdReservation = reservationRepository.findByClientId(clientId);
@@ -111,10 +115,13 @@ public class ServiceIntegrationTest {
     public void testUpdateReservation() {
         HashMap<String, String> schema = new HashMap<>();
         schema.put("key", "value");
+        LocalTime startTime = LocalTime.of(6, 0, 0);
+        LocalTime endTime = LocalTime.of(18, 0, 0);
 
-        ClientDTO clientDTO = new ClientDTO(schema, LocalTime.now().minusHours(5), LocalTime.now(), 1, 1);
+        ClientDTO clientDTO = new ClientDTO(schema, startTime, endTime, 1, 1);
         Long clientId = reservationService.createClient(clientDTO);
-        ReservationDTO reservationDTO = new ReservationDTO(clientId, 1L, LocalDateTime.now().minusHours(2), numSlots, customValues);
+        LocalDateTime reservationStartTime = LocalDateTime.of(2023, 11, 30, 12, 0, 0);
+        ReservationDTO reservationDTO = new ReservationDTO(clientId, 1L, reservationStartTime, numSlots, customValues);
         reservationService.createReservation(reservationDTO);
 
         List<Reservation> reservations = reservationRepository.findByClientId(clientId);
