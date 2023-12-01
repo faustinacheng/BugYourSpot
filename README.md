@@ -295,10 +295,23 @@ Example Style Checker Reports:\
 - Currently: the PostgreSQL database is being hosted locally. Thus, end-to-end testing of this service can only be done on our local machines. We start up our database, use Maven to build the service, and execute all unit/system tests by manually running them in an IDE.
 - Next steps: use Docker to create container for application. From there, our client will be able to run an instance of our program on any machine, since the PostgreSQL database will be hosted on GCP. Further, we will set up a git pre-push hook to automatically run all unit and system tests upon pushing to the repo.
 
-# How to See Code Coverage
+# Code Coverage
 
+To see code coverage, we used Jacoco \
+Here are the commands used: \
 `mvn clean test jacoco:report`\
 Then, open **../BugYourSpot/target/site/jacoco/com.example.bugyourspot.reservation/index.html**
+
+Here is a screenshot of the coverage, with 91% branch coverage\
+![](\documentation\allCoverage.png)
+
+# Workflow (CI)
+
+We setup the Workflow using Github Actions, with the pipeline triggering the build and test after every push.\
+Here is a screenshot of the Github Actions page with our workflows:
+![](\documentation\gitWorkflow.png)
+Here are the specific jobs run within the workflow:
+![](\documentation\workflowJobs.png)
 
 # Sources
 
