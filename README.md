@@ -1,122 +1,99 @@
 # BugYourSpot 🐛🐞🪲
 
-a reservation booking service, made with <3 by BugBusters.\
-Peter Ma, Faustina Cheng, Shreya Somayajula, Youngseo Lee, & Patrick Tong
+A reservation booking service, made with <3 by BugBusters.\
+Faustina Cheng, Youngseo Lee, Peter Ma, Shreya Somayajula, & Patrick Tong
+
+# Client Application
+
+See [Cricket Care](https://github.com/faustinacheng/CricketCare), a demoable client that uses our BugYourSpot service.
 
 # Components:
 
 API Description and Workflow:
+
 BugYourSpot's structure derives from Spring Boot Flow Architecture examples, which provide several layers of abstraction between the client and the service itself. The client, which is any business that would need to employ some reservation schedule—restaurants, hospitals, the DMV, and more—can make use of several API endpoints to send certain requests. The parameterized information that the client sends is then parsed and gradually propagated throughout the various layers, with various elements of error checking occurring at different levels.
 
 The ReservationController class acts as the first level of interaction with the client, using `@PostMapping`, `@GetMapping`, `@DeleteMapping`, and `@GetMapping` annotations to define several endpoints that the client will connect to. The first endpoint that businesses will utilize is the `createReservationSchema`, which allows the business to define custom fields that are relevant to their unique customers. For instance, restaurants may elect for a field such as "occasion" to indicate something like an anniversary or a birthday celebration. On the other hand, hospitals may designate a field called "doctor" to store which doctor each reservation will be meeting with. The custom schemas are managed on the backend through an Entity-Attribute Value Model; this structure makes use of several individual tables, linking them together through primary keys and allowing for easy field customizability across different clients. Here is a preliminary diagram of our database.
 
 The ReservationService class acts as the next layer of logic, providing the method definitions for functions such as `addNewReservation()`, `deleteReservation()`, and `updateReservation()`. The class initializes an instance of a `ReservationRepository` object, which represents the lowest layer connected to the actual database. Through this object, the ReservationService class implements certain exception handling cases such as when the client / business attempts to delete a non-existent reservation.
 
-`POST /reservations/createReservationSchema`\
-Description: Application provides certain fields that they want to represent a reservation with. This is in the form of a JSON object. The service validates these fields to ensure that it matches the expected format. Once validated, our service will dynamically generate the database schema based on the custom fields and their data types. Thus, this API should be called just once and before all other API calls.\
+# API Documentation
+
+`POST /reservations/createClient`\
+Description: The client provides certain fields that they want to represent a reservation with. This is in the form of a JSON object. There are a set of required reservation parameters they have to specify (startTime, endTime, slotLength, reservationsPerSlot) as well as a customValues JSON they can pass in for custom fields they want to include for their reservations. The service validates these fields to ensure that it matches the expected format. Once validated, our service will dynamically generate the database schema based on the custom fields and their data types. Thus, this API should be called just once and before all other API calls.\
 Request Body: JSON object that represents the fields of a reservation\
-Example Usage: `/createReservationSchema`
+Example Usage: `/createClient`
 
 1. Restaurant
 
 ```json
 {
-  "fields": [
-    {
-      "name": "date",
-      "type": "date"
-    },
-    {
-      "name": "hour",
-      "type": "integer"
-    },
-    {
-      "name": "numSlots",
-      "type": "integer"
-    },
-    {
-      "name": "clientId",
-      "type": "integer"
-    },
-    {
-      "name": "userId",
-      "type": "integer"
-    },
-    {
-      "name": "allergies",
-      "type": "varchar"
-    },
-    {
-      "name": "partySize",
-      "type": "integer"
-    },
-    {
-      "name": "specialOccasion",
-      "type": "varchar"
-    }
-  ]
+  "customValues": {
+    "partySize": "INTEGER",
+    "birthday": "BOOLEAN"
+  },
+  "startTime": "09:00:00",
+  "endTime": "21:00:00",
+  "slotLength": 30,
+  "reservationsPerSlot": 2
 }
+```
+
+Response: 200 OK and client ID
+
+```json
+1
 ```
 
 2. Hospital
 
 ```json
 {
-  "fields": [
-    {
-      "name": "date",
-      "type": "date"
-    },
-    {
-      "name": "hour",
-      "type": "integer"
-    },
-    {
-      "name": "numSlots",
-      "type": "integer"
-    },
-    {
-      "name": "clientId",
-      "type": "integer"
-    },
-    {
-      "name": "userId",
-      "type": "integer"
-    },
-    {
-      "name": "notes",
-      "type": "varchar"
-    },
-    {
-      "name": "insurance_provider",
-      "type": "varchar"
-    },
-    {
-      "name": "doctor",
-      "type": "varchar"
-    }
-  ]
+  "customValues": {
+    "doctorId": "INTEGER",
+    "patientNotes": "VARCHAR"
+  },
+  "startTime": "06:00:00",
+  "endTime": "18:00:00",
+  "slotLength": 60,
+  "reservationsPerSlot": 1
 }
 ```
 
-Response Format:
+Response: 200 OK and client ID
 
 ```json
-{
-  "status": "success",
-  "data": null
-}
+2
 ```
 
-Possible statuses: “success”, “client already initialized”, “wrong format”
+Other possible statuses: “success”, “client already initialized”, “wrong format”
 
-Parse JSON and populate key(label) value(datatype) map
-Check if mandatory fields are included
-Status code (WRONG FORMAT) if not included
-Iterate through key value map, adding new row to Attribute entity
-Insert row in InitializedSchema entity
+`GET /reservation/getClients`
+Description: Get all clients that are registered with our reservation service. Mainly used for testing purposes, will require root permissions to access.\
+Example Usage: `/reservations/getClients`
 
-`POST /reservations/createReservation`\
+Response: 200 OK and client information
+
+```json
+[
+  {
+    "clientId": 1,
+    "startTime": "09:00:00",
+    "endTime": "21:00:00",
+    "slotLength": 30,
+    "reservationsPerSlot": 2
+  },
+  {
+    "clientId": 2,
+    "startTime": "06:00:00",
+    "endTime": "18:00:00",
+    "slotLength": 60,
+    "reservationsPerSlot": 1
+  }
+]
+```
+
+`POST /reservation`\
 Description: Create a new reservation.\
 Request Body: JSON object representing the reservation details.\
 Example Usage: `/reservations/createReservation`
@@ -125,38 +102,37 @@ Example Usage: `/reservations/createReservation`
 
 ```json
 {
-  "date": 2023-10-05,
-  "hour": 17,
+  "clientId": 1,
+  "userId": 1,
+  "startTime": "2023-11-29T14:00:00",
   "numSlots": 2,
-  “clientId”: 3,
-  "userId": 55,
-   "allergies": “trader joes peanut butter filled pretzel nuggets”,
-  “partySize”:10,
- “specialOccasion”:”birthday”
-}
-
-Hospital
-	{
-  "date": 2023-10-06,
-  "hour": 8,
-  "numSlots": 1,
-  “clientId”: 36,
-  "userId": 59,
-  “notes”: “Concern for high blood pressure”,
-  "insurance_provider": “Aetna”,
-   "doctor": “Dr.  Seuss”
-}
-
-Response Format:
-{
-    "status": "success",
-    "data": [{
-	“reservationId”: 46
-     }]
+  "customValues": {
+    "partySize": 4,
+    "birthday": true
+  }
 }
 ```
 
-Possible statuses: “success”, “client not initialized”, “invalid slot”, “wrong format”
+Response: 200 OK
+
+2. Hospital
+
+```json
+{
+  "clientId": 2,
+  "userId": 1,
+  "startTime": "2023-11-29T08:00:00",
+  "numSlots": 1,
+  "customValues": {
+    "doctorId": 1,
+    "patientNotes": "diabetes"
+  }
+}
+```
+
+Response: 200 OK
+
+Other possible statuses: “success”, “client not initialized”, “invalid slot”, “wrong format”
 
 Error if client not initialized
 Parse JSON into `ReservationDTO` object
@@ -177,27 +153,20 @@ Usage: Applications can use this endpoint to modify reservation details, such as
 
 Request Body: JSON with reservationId, clientId, and the fields to be updated
 
-Example request:
+Example request: `/reservations/updateReservation`
 
 ```json
 {
-  "reservationId": 334,
-  “clientId”: 36,
-  “notes”: “Concern for high blood pressure and diarrhea”,
-   "doctor": “Dr. Phil”
+  "reservationId": 1,
+  "clientId": 2,
+  "notes": "Concern for high blood pressure and diarrhea",
+  "doctor": "Dr. Phil"
 }
 ```
 
-Response Format:
+Response: 200 OK
 
-```json
-{
-  "status": "success",
-  "data": null
-}
-```
-
-Possible statuses: “success”, “client not initialized”, “wrong format”
+Other possible statuses: “success”, “client not initialized”, “wrong format”
 
 Error if client not initialized
 Parse JSON using the Jackson library
@@ -208,98 +177,100 @@ Update given attributes
 Description: Delete a reservation or time slot.
 Usage: Applications can call this endpoint to remove a reservation when it's no longer needed or has been canceled.
 Request Body: `reservationId`
-
-Response Format:
+Example request: `/reservations/deleteReservation`
 
 ```json
-{
-  "status": "success",
-  "data": null
-}
+1
 ```
+
+Response: 200 OK
 
 Possible statuses: “success”, “client not initialized”, “no reservation found”
 
 Error if client not initialized, or reservationId not in Reservations
 Delete row from Reservations table, update Occupancy, delete relevant rows with the same reservationId from the relevant datatype tables
 
-`GET /reservations/getReservation`\
+`GET /reservations/getClientReservations`\
 Description: Retrieve a list of all reservations made by a client.\
 Query Parameters: `clientId`
 
 Our service will return all reservations made by the client – represented as a simple JSON object with a list of reservation objects.
 
-Example Response:
-Possible statuses: “success”, “client not initialized”
+Example Usage: `/reservations/getClientReservations?clientId=1`
+Response: 200 OK
+
+1. Restaurant
 
 ```json
-{
-  "status": "success",
-  "data": [
-    {
-      "date": "2023-10-05",
-      "hour": 17,
-      "numSlots": 2,
-      "clientId": 3,
-      "userId": 55,
-      "allergies": "trader joes peanut butter filled pretzel nuggets",
-      "partySize": 10,
-      "specialOccasion": "birthday"
-    },
-    {
-      "date": "2023-10-07",
-      "hour": 19,
-      "numSlots": 3,
-      "clientId": 4,
-      "userId": 56,
-      "allergies": "shrimp",
-      "partySize": 5,
-      "specialOccasion": "anniversary"
-    },
-    {
-      "date": "2023-10-10",
-      "hour": 20,
-      "numSlots": 1,
-      "clientId": 5,
-      "userId": 57,
-      "allergies": "dairy products",
-      "partySize": 3,
-      "specialOccasion": "promotion"
-    },
-    {
-      "date": "2023-10-15",
-      "hour": 18,
-      "numSlots": 2,
-      "clientId": 6,
-      "userId": 58,
-      "allergies": "gluten",
-      "partySize": 7,
-      "specialOccasion": "family gathering"
-    },
-    {
-      "date": "2023-10-20",
-      "hour": 21,
-      "numSlots": 4,
-      "clientId": 7,
-      "userId": 59,
-      "allergies": "nuts",
-      "partySize": 8,
-      "specialOccasion": "reunion"
-    }
-  ]
-}
+[
+  {
+    "birthday": "true",
+    "numSlots": "2",
+    "clientId": "1",
+    "reservationId": "1",
+    "startTime": "2023-11-29T14:00",
+    "partySize": "4",
+    "userId": "1"
+  },
+  {
+    "birthday": "true",
+    "numSlots": "2",
+    "clientId": "1",
+    "reservationId": "2",
+    "startTime": "2023-11-29T14:00",
+    "partySize": "4",
+    "userId": "1"
+  }
+]
 ```
+
+Example Usage: `/reservations/getClientReservations?clientId=2`
+Response: 200 OK
+
+2. Hospital
+
+```json
+[
+  {
+    "numSlots": "1",
+    "patientNotes": "diabetes",
+    "clientId": "2",
+    "reservationId": "3",
+    "doctorId": "1",
+    "startTime": "2023-11-29T08:00",
+    "userId": "1"
+  }
+]
+```
+
+Other possible statuses: “success”, “client not initialized”
 
 # Tests
 
 Using JUnit + Mockito framework
 
 - Unit Tests:
+
   - `ReservationRepositoryTest.java`
   - `ReservationServiceTest.java`
   - `ReservationTest.java`
-- System Tests: - `ReservationControllerTest.java` - Mock server-client communication over network (with localhost) using Intellij's HTTP Client Tool ###
-  Example System Test Run:
+  - `ReservationDTOTest.java`
+  - `ClientDTOTest.java`
+
+- System Tests:
+
+  - `ReservationControllerTest.java` - Mock server-client communication over network (with localhost) using Intellij's HTTP Client Tool
+
+- Internal Integration Tests:
+
+  - `ServiceIntegrationTest.java`
+
+- External Integration Tests:
+  - `ServiceIntegrationTest.java`
+  - `ConcurrentClientTest.java`
+  - `ReservationRepositoryTest.java`
+
+### Example System Test Run:
 
 ```
 POST http://localhost:8080/api/v1/reservation
@@ -351,6 +322,16 @@ Example Failed Requests
   "path": "/api/v1/reservation/1"
 }
 ```
+
+# Test Documentation
+
+Additional test documentations are located in the `documentation/` folder in the root directory.
+
+- Continuous Integration: CI is set up for the repo such that all build, analysis, and testing tools are automatically run. See report.
+- Internal integration: Integration tests are automatically run during CI. See report.
+- Branch Coverage: Greater than 85% of branch coverage was achieved. See report.
+- Bug Finder: A static analysis bug finder tool is run automatically during CI. See report.
+- End-to-end Testing: End-to-end testing of a client was carried out manually and documented.
 
 # Setting up Style Checker
 

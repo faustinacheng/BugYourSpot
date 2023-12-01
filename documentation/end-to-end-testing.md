@@ -264,7 +264,7 @@ Returns: 200 OK and client information
 
 Returns: 200 OK
 
-Returns only client 2's revservations.
+Returns only client 2's reservations.
 
 `GET http://localhost:8080/api/v1/reservation/getClientReservations?clientId=1`
 
