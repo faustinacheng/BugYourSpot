@@ -303,15 +303,15 @@ Here are the commands used: \
 Then, open **../BugYourSpot/target/site/jacoco/com.example.bugyourspot.reservation/index.html**
 
 Here is a screenshot of the coverage, with 91% branch coverage\
-![](\documentation\allCoverage.png)
+![](documentation/allCoverage.png)
 
 # Workflow (CI)
 
 We setup the Workflow using Github Actions, with the pipeline triggering the build and test after every push.\
 Here is a screenshot of the Github Actions page with our workflows:
-![](\documentation\gitWorkflow.png)
+![](documentation/gitWorkflow.png)
 Here are the specific jobs run within the workflow:
-![](\documentation\workflowJobs.png)
+![](documentation/workflowJobs.png)
 
 # Sources
 
