@@ -76,8 +76,9 @@ public class ReservationService {
         return clientId;
     }
 
-    public List<Client> getClients () {
-        return clientRepository.findAll();
+    public Client getClient (Long clientId) {
+        return clientRepository.findById(clientId)
+                .orElseThrow(() -> new IllegalStateException("client with id " + clientId + " does not exist"));
     }
 
     public List<Map<String, String>> getClientReservations(Long clientId) {

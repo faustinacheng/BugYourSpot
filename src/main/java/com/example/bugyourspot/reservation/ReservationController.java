@@ -23,20 +23,10 @@ public class ReservationController {
         return reservationService.createClient(clientDTO);
     }
 
-    @RequestMapping(
-            value = "/getClients",
-            method = RequestMethod.GET)
-    public List<Client> getClients() {
-        return reservationService.getClients();
+    @GetMapping("/getClient")
+    public Client getClient(@RequestParam("clientId") Long clientId) {
+        return reservationService.getClient(clientId);
     }
-
-//    @RequestMapping(
-//            value = "/getClientReservations",
-//            method = RequestMethod.GET)
-//    @ResponseBody
-//    public List<Reservation> getClientReservations(@RequestParam Long clientId) {
-//        return reservationService.getClientReservations(clientId);
-//    }
 
     @GetMapping("/getClientReservations")
     public List<Map<String, String>> getClientReservations(@RequestParam("clientId") Long clientId) {
