@@ -68,9 +68,9 @@ Response: 200 OK and client ID
 
 Other possible statuses: “success”, “client already initialized”, “wrong format”
 
-`GET /reservation/getClients`
+`GET /reservation/getClient`
 Description: Get all clients that are registered with our reservation service. Mainly used for testing purposes, will require root permissions to access.\
-Example Usage: `/reservations/getClients`
+Example Usage: `/reservations/getClient?clientId=1`
 
 Response: 200 OK and client information
 
@@ -174,10 +174,10 @@ Status code: WRONG FORMAT if reservationId or clientId not included, or fields t
 Update given attributes
 
 `DELETE /reservations/deleteReservation`\
-Description: Delete a reservation or time slot.
+Description: Delete a reservation or time slot given a path variable.
 Usage: Applications can call this endpoint to remove a reservation when it's no longer needed or has been canceled.
 Request Body: `reservationId`
-Example request: `/reservations/deleteReservation`
+Example request: `/reservations/deleteReservation/1`
 
 ```json
 1

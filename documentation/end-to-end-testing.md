@@ -25,20 +25,18 @@ Returns: 200 OK and client ID
 1
 ```
 
-`GET http://localhost:8080/api/v1/reservation/getClients`
+`GET http://localhost:8080/api/v1/reservation/getClient?clientId=1`
 
 Returns: 200 OK and client information
 
 ```json
-[
-  {
-    "clientId": 1,
-    "startTime": "09:00:00",
-    "endTime": "21:00:00",
-    "slotLength": 30,
-    "reservationsPerSlot": 2
-  }
-]
+{
+  "clientId": 1,
+  "startTime": "09:00:00",
+  "endTime": "21:00:00",
+  "slotLength": 30,
+  "reservationsPerSlot": 2
+}
 ```
 
 ## Invalid Single Reservation Creations
@@ -224,27 +222,18 @@ Returns: 200 OK and client ID
 
 New client can be seen.
 
-`GET http://localhost:8080/api/v1/reservation/getClients`
+`GET http://localhost:8080/api/v1/reservation/getClient?clientId=2`
 
 Returns: 200 OK and client information
 
 ```json
-[
-  {
-    "clientId": 1,
-    "startTime": "09:00:00",
-    "endTime": "21:00:00",
-    "slotLength": 30,
-    "reservationsPerSlot": 2
-  },
-  {
-    "clientId": 2,
-    "startTime": "06:00:00",
-    "endTime": "18:00:00",
-    "slotLength": 60,
-    "reservationsPerSlot": 1
-  }
-]
+{
+  "clientId": 2,
+  "startTime": "06:00:00",
+  "endTime": "18:00:00",
+  "slotLength": 60,
+  "reservationsPerSlot": 1
+}
 ```
 
 `POST http://localhost:8080/api/v1/reservation`
