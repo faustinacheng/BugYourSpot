@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.aspectj.weaver.ast.Var;
 import org.checkerframework.checker.units.qual.s;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -55,11 +56,32 @@ public class ReservationService {
 
     public Long createClient(ClientDTO clientDTO) {
         Client client = new Client();
-        // check that start time < end time, start time greater than 0, reservationsPerSlot >
-        client.setStartTime(clientDTO.getStartTime());
-        client.setEndTime(clientDTO.getEndTime());
-        client.setSlotLength(clientDTO.getSlotLength());
-        client.setReservationsPerSlot(clientDTO.getReservationsPerSlot());
+        LocalTime startTime = clientDTO.getStartTime();
+        LocalTime endTime = clientDTO.getEndTime();
+        int slotLength = clientDTO.getSlotLength();
+        int reservationsPerSlot = clientDTO.getReservationsPerSlot();
+
+        // check that all required fields are present
+        if (startTime == null) {
+            throw new IllegalArgumentException("Missing required field: startTime");
+        }
+        if (endTime == null) {
+            throw new IllegalArgumentException("Missing required field: endTime");
+        }
+        if (slotLength <= 0) {
+            throw new IllegalArgumentException("Missing required field: slotLength");
+        }
+        if (reservationsPerSlot <= 0) {
+            throw new IllegalArgumentException("Missing required field: reservationsPerSlot");
+        }
+        if (startTime.isAfter(endTime)) {
+            throw new IllegalArgumentException("Start time must be before end time");
+        }
+
+        client.setStartTime(startTime);
+        client.setEndTime(endTime);
+        client.setSlotLength(slotLength);
+        client.setReservationsPerSlot(reservationsPerSlot);
 
         clientRepository.save(client);
         
@@ -69,6 +91,11 @@ public class ReservationService {
         // Call AttributeRepository to add (value, type) to attributes table for each custom attribute
         for (String attributeName : schema.keySet()) {
             String attributeType = schema.get(attributeName);
+
+            if (attributeType == null || !attributeType.matches("DATETIME|VARCHAR|INTEGER|BOOLEAN|DOUBLE")) {
+                throw new IllegalArgumentException("Missing/invalid attribute type for attribute: " + attributeName);
+            } 
+
             Attribute attribute = new Attribute(clientId, attributeName, attributeType);
             attributeRepository.save(attribute);
         }
@@ -78,22 +105,26 @@ public class ReservationService {
 
     public Client getClient (Long clientId) {
         return clientRepository.findById(clientId)
-                .orElseThrow(() -> new IllegalStateException("client with id " + clientId + " does not exist"));
+                .orElseThrow(() -> new IllegalArgumentException("client with id " + clientId + " does not exist"));
     }
 
     public List<Map<String, String>> getClientReservations(Long clientId) {
+        if (!clientRepository.existsById(clientId)) {
+            throw new IllegalStateException("client with id " + clientId + " does not exist");
+        }
+
         List<Map<String, String>> results = new ArrayList<>();
         List<Reservation> reservations = reservationRepository.findByClientId(clientId);
         List<Attribute> attributes = attributeRepository.findByClientId(clientId);
 
         for (Reservation reservation: reservations) {
             Long reservationId = reservation.getReservationId();
-            Map<String, String> entry = new HashMap<String, String>();
+            Map<String, String> entry = new LinkedHashMap<String, String>();
+            entry.put("clientId", reservation.getClientId().toString());
+            entry.put("userId", reservation.getUserId().toString());
             entry.put("reservationId", reservation.getReservationId().toString());
             entry.put("startTime", reservation.getStartTime().toString());
             entry.put("numSlots", reservation.getNumSlots().toString());
-            entry.put("clientId", reservation.getClientId().toString());
-            entry.put("userId", reservation.getUserId().toString());
 
             for (Attribute attribute: attributes) {
                 String dataType = attribute.getDataType();
@@ -130,74 +161,96 @@ public class ReservationService {
     }
 
     @Transactional
-    public void createReservation(ReservationDTO reservationDTO) {
-        // Get client reservation schema info
+    public void createReservation(ReservationDTO reservationDTO) throws IllegalArgumentException {
+        // Check that all required fields are present and valid
         Long clientId = reservationDTO.getClientId();
-        Client client = clientRepository.findReservationSchemaByClientId(clientId);
-        int slotLength = client.getSlotLength();
-        Integer reservationsPerSlot = client.getReservationsPerSlot();
-
-        // Create reservation object
+        Long userId = reservationDTO.getUserId();
         LocalDateTime startTime = reservationDTO.getStartTime();
         Integer numSlots = reservationDTO.getNumSlots();
-        Reservation reservation = new Reservation(clientId, reservationDTO.getUserId(), startTime, numSlots);
-
-        int startTimeMins = startTime.toLocalTime().getMinute() ;
-        LocalDateTime endTime = startTime.plusMinutes(slotLength * numSlots);
-
-        if (startTimeMins % slotLength != 0) {
-            throw new IllegalArgumentException("Reservation start time is not a multiple of slot length");
+        
+        if (clientId == null) {
+            throw new IllegalArgumentException("Missing required field: clientId");
         }
 
+        if (userId == null) {
+            throw new IllegalArgumentException("Missing required field: userId");
+        }
+
+        if (startTime == null) {
+            throw new IllegalArgumentException("Missing required field: startTime");
+        }
+
+        if (numSlots == null) {
+            throw new IllegalArgumentException("Missing required field: numSlots");
+        }
+
+        if (numSlots <= 0) {
+            throw new IllegalArgumentException("numSlots must be greater than 0");
+        }
+
+        Client client = clientRepository.findReservationSchemaByClientId(clientId);
+        if (client == null) {
+            throw new IllegalArgumentException("client with id " + clientId + " does not exist");
+        }
+         
+        int slotLength = client.getSlotLength();
+        
+        LocalDateTime endTime = startTime.plusMinutes(slotLength * numSlots);
         if (startTime.toLocalTime().isBefore(client.getStartTime()) || endTime.toLocalTime().isAfter(client.getEndTime())) {
             throw new IllegalArgumentException("Reservation time is not within client's time range");
         }
 
-        // Track the number of reservations per requested time slot
-        Map<LocalDateTime, Integer> reservationsPerTimeSlot = new HashMap<>();
-        for (int i = 0; i < numSlots; i++) {
-            LocalDateTime slotStartTime = startTime.plusMinutes(slotLength * i);
-            reservationsPerTimeSlot.put(slotStartTime, 0);
+        if (startTime.toLocalTime().getMinute() % slotLength != 0) {
+            throw new IllegalArgumentException("Reservation start time is not a multiple of slot length");
+        }
+
+        Map<String, String> customValues = reservationDTO.getCustomValues();
+        List<Attribute> attributes = attributeRepository.findByClientId(clientId);
+
+        // Check that all required custom attributes are present
+        for (Attribute attribute : attributes) {
+            String label = attribute.getLabel();
+            if (!customValues.containsKey(label)) {
+                throw new IllegalArgumentException("Missing custom field: " + label);
+            }
         }
 
         // Check that the time slots are not fully booked
-        List<Reservation> prevReservations = reservationRepository.findByClientId(clientId);
+        Integer clientReservationsPerSlot = client.getReservationsPerSlot();
 
-        for (Reservation prevReservation: prevReservations) {
+        // Track the number of reservations per requested time slot
+        Map<LocalDateTime, Integer> filledReservationsPerSlot = new HashMap<>();
+        for (int i = 0; i < numSlots; i++) {
+            LocalDateTime slotStartTime = startTime.plusMinutes(slotLength * i);
+            filledReservationsPerSlot.put(slotStartTime, 0);
+        }
+
+        for (Reservation prevReservation: reservationRepository.findByClientId(clientId)) {
             LocalDateTime prevStartTime = prevReservation.getStartTime();
             int prevNumSlots = prevReservation.getNumSlots();
 
             for (int i = 0; i < prevNumSlots; i++) {
                 LocalDateTime slotStartTime = prevStartTime.plusMinutes(slotLength * i);
 
-                if (reservationsPerTimeSlot.containsKey(slotStartTime)) {
-                    reservationsPerTimeSlot.put(slotStartTime, reservationsPerTimeSlot.get(slotStartTime) + 1);
+                if (filledReservationsPerSlot.containsKey(slotStartTime)) {
+                    filledReservationsPerSlot.put(slotStartTime, filledReservationsPerSlot.get(slotStartTime) + 1);
 
-                    if (reservationsPerTimeSlot.get(slotStartTime) == reservationsPerSlot) {
+                    if (filledReservationsPerSlot.get(slotStartTime) == clientReservationsPerSlot) {
                         throw new IllegalArgumentException("Reservation time slots are fully booked");
                     }
                 }
             }
         }
 
-        // Reservation valid, save reservation and custom values
+        // Reservation is valid, save reservation and custom values
+        Reservation reservation = new Reservation(clientId, userId, startTime, numSlots);
         reservationRepository.save(reservation);
 
         Long reservationId = reservation.getReservationId();
-        Map<String, String> customValues = reservationDTO.getCustomValues();
-
-        List<Attribute> attributes = attributeRepository.findByClientId(clientId);
         for (Attribute attribute : attributes) {
-            String label = attribute.getLabel();
-
-            if (!customValues.containsKey(label)) {
-                throw new IllegalArgumentException("Missing attribute: " + label);
-            }
-
             String dataType = attribute.getDataType();
-            String value = customValues.get(label);
+            String value = customValues.get(attribute.getLabel());
 
-            // Using dataType, decide which table/repository to use
             if (dataType.equals("DATETIME")) {
                 DatetimeType datetimeType = new DatetimeType(reservationId, attribute.getAttributeId(), value);
                 datetimeTypeRepository.save(datetimeType);
@@ -217,7 +270,6 @@ public class ReservationService {
             } else if (dataType.equals("DOUBLE")) {
                 DoubleType doubleType =  new DoubleType(reservationId, attribute.getAttributeId(), value);
                 doubleTypeRepository.save(doubleType);
-
             }
         }
     }

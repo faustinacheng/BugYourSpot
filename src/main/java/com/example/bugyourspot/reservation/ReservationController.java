@@ -2,6 +2,9 @@ package com.example.bugyourspot.reservation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -20,22 +23,42 @@ public class ReservationController {
             value = "/createClient",
             method = RequestMethod.POST)
     public Long createClient (@RequestBody ClientDTO clientDTO) {
-        return reservationService.createClient(clientDTO);
+        try {
+            return reservationService.createClient(clientDTO);
+        } catch (IllegalArgumentException e) {
+            System.err.println("ERROR: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     @GetMapping("/getClient")
     public Client getClient(@RequestParam("clientId") Long clientId) {
-        return reservationService.getClient(clientId);
+        try {
+            return reservationService.getClient(clientId);
+        } catch (IllegalArgumentException e) {
+            System.err.println("ERROR: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     @GetMapping("/getClientReservations")
     public List<Map<String, String>> getClientReservations(@RequestParam("clientId") Long clientId) {
-        return reservationService.getClientReservations(clientId);
+        try {
+            return reservationService.getClientReservations(clientId);
+        } catch (IllegalArgumentException e) {
+            System.err.println("ERROR: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     @PostMapping
     public void createReservation(@RequestBody ReservationDTO reservationDto) {
-        reservationService.createReservation(reservationDto);
+        try {
+            reservationService.createReservation(reservationDto);
+        } catch (IllegalArgumentException e) {
+            System.err.println("ERROR: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     @DeleteMapping(path = "{reservationId}")
