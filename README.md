@@ -7,6 +7,10 @@ Faustina Cheng, Youngseo Lee, Peter Ma, Shreya Somayajula, & Patrick Tong
 
 See [Cricket Care](https://github.com/faustinacheng/CricketCare), a demoable client that uses our BugYourSpot service.
 
+The client app, Cricket Care, is a web application used by hospital employees to schedule and manage medical appointments. It makes API calls to our BugYourSpot service to customize what fields they want to store and what datatypes those fields should be. API calls to our service also create/fetch/update/delete appointments. Hospital employees interact with the client app through the front end of the web app, by inputing relevant data into forms.
+
+Previously, users might be constrained with the kind of data they can store in a booking service such as ours. But with BugYourSpot, we allow flexibility by letting their schema be customized, while still providing the foundational booking service. Additionally, the service also performs certain error checks such as checking that times are within their allowable time range, if the time slot has already been booked, and the required fields are being passed in and in the right format, etc.
+
 # Components:
 
 API Description and Workflow:
@@ -66,7 +70,7 @@ Response: 200 OK and client ID
 2
 ```
 
-Other possible statuses: “success”, “client already initialized”, “wrong format”
+Other possible statuses: 400 Bad Request and relevant error message if endTime is before startTime/required fields are not passed in/in the wrong format
 
 `GET /reservation/getClient`
 Description: Get all clients that are registered with our reservation service. Mainly used for testing purposes, will require root permissions to access.\
@@ -96,7 +100,7 @@ Response: 200 OK and client information
 `POST /reservation`\
 Description: Create a new reservation.\
 Request Body: JSON object representing the reservation details.\
-Example Usage: `/reservations/createReservation`
+Example Usage: `/reservations`
 
 1. Restaurant
 
@@ -132,33 +136,21 @@ Response: 200 OK
 
 Response: 200 OK
 
-Other possible statuses: “success”, “client not initialized”, “invalid slot”, “wrong format”
+Other possible statuses: 400 Bad Request with relevant error message for invalid format/missing/extra fields/unavailable booking/booking not within allowed time
 
 Error if client not initialized
-Parse JSON into `ReservationDTO` object
-Call `AddNewReservation`, passing in the `ReservationDTO` object
-Validation (status code: WRONG FORMAT if incorrect):
-Get labels and datatype from Attributes table where clientId = our client
-Check if all labels are passed in through JSON
-Go through each attribute and add into correct entity based on datatype
-Add to Reservations and update Occupancy
-Validation (status code: INVALID SLOT if time slot is not valid)
-Get all available time slots for the client
-Check that requested time slots exist and are free
-Return `reservationId` for successful reservation
 
-`PUT /reservations/updateReservation`\
+`PUT /reservations`\
 Description: Update an existing reservation or time slot.\
 Usage: Applications can use this endpoint to modify reservation details, such as changing the booking time or updating user information.\
 
-Request Body: JSON with reservationId, clientId, and the fields to be updated
+Request Body: JSON with reservationId, and the fields to be updated
 
-Example request: `/reservations/updateReservation`
+Example request: `/reservations`
 
 ```json
 {
   "reservationId": 1,
-  "clientId": 2,
   "notes": "Concern for high blood pressure and diarrhea",
   "doctor": "Dr. Phil"
 }
@@ -166,18 +158,13 @@ Example request: `/reservations/updateReservation`
 
 Response: 200 OK
 
-Other possible statuses: “success”, “client not initialized”, “wrong format”
+Other possible statuses: 400 Bad Request with relevant error message for invalid format/missing/extra fields/unavailable booking/booking not within allowed time/reservation Id doesn't exist
 
-Error if client not initialized
-Parse JSON using the Jackson library
-Status code: WRONG FORMAT if reservationId or clientId not included, or fields to update are not in attributes list for that client
-Update given attributes
-
-`DELETE /reservations/deleteReservation`\
+`DELETE /reservations?reservationId={reservationId}`\
 Description: Delete a reservation or time slot given a path variable.
 Usage: Applications can call this endpoint to remove a reservation when it's no longer needed or has been canceled.
-Request Body: `reservationId`
-Example request: `/reservations/deleteReservation/1`
+Request Body: None
+Example request: `/reservations?reservationId=1`
 
 ```json
 1
@@ -185,10 +172,7 @@ Example request: `/reservations/deleteReservation/1`
 
 Response: 200 OK
 
-Possible statuses: “success”, “client not initialized”, “no reservation found”
-
-Error if client not initialized, or reservationId not in Reservations
-Delete row from Reservations table, update Occupancy, delete relevant rows with the same reservationId from the relevant datatype tables
+Possible statuses: 400 Bad Request with relevant error message if reservation Id doesn't exist
 
 `GET /reservations/getClientReservations`\
 Description: Retrieve a list of all reservations made by a client.\
@@ -243,7 +227,7 @@ Response: 200 OK
 ]
 ```
 
-Other possible statuses: “success”, “client not initialized”
+Other possible statuses: 400 Bad Request with relevant error message if client Id is not registered
 
 # Tests
 
