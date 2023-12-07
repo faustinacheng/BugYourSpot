@@ -83,6 +83,6 @@ public class ReservationController {
 
     // @GetMapping
     // public List<Reservation> getReservations() {
-    //     return reservationService.getReservations();
+    //     return reservationService.getReservations();g
     // }
 }

@@ -49,10 +49,10 @@ public class ReservationService {
         this.booleanTypeRepository = booleanTypeRepository;
     }
 
-    @GetMapping
-    public List<Reservation> getReservations() {
-        return reservationRepository.findAll();
-    }
+    // @GetMapping
+    // public List<Reservation> getReservations() {
+    //     return reservationRepository.findAll();
+    // }
 
     public Long createClient(ClientDTO clientDTO) {
         Client client = new Client();
@@ -110,7 +110,7 @@ public class ReservationService {
 
     public List<Map<String, String>> getClientReservations(Long clientId) {
         if (!clientRepository.existsById(clientId)) {
-            throw new IllegalStateException("client with id " + clientId + " does not exist");
+            throw new IllegalArgumentException("client with id " + clientId + " does not exist");
         }
 
         List<Map<String, String>> results = new ArrayList<>();
@@ -279,7 +279,7 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findByReservationId(reservationId);
 
         if (reservation == null) {
-            throw new IllegalStateException("reservation with id " + reservationId + " does not exist");
+            throw new IllegalArgumentException("reservation with id " + reservationId + " does not exist");
         }
 
         // get the attributes associated with this reservation (based on which client it belongs to)
@@ -307,7 +307,7 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findByReservationId(reservationId);
 
         if (reservation == null) {
-            throw new IllegalStateException("reservation with id " + reservationId + " does not exist");
+            throw new IllegalArgumentException("reservation with id " + reservationId + " does not exist");
         }
 
         Long clientId = reservation.getClientId();
@@ -399,7 +399,7 @@ public class ReservationService {
             }
 
             if (attribute == null) {
-                throw new IllegalStateException("attribute with label " + key + " does not exist");
+                throw new IllegalArgumentException("attribute with label " + key + " does not exist");
             }
 
             String dataType = attribute.getDataType();

@@ -51,57 +51,116 @@ import java.util.Arrays;
      private Reservation reservation;
      @Mock
      private Client client;
+     private ClientDTO clientDTO = new ClientDTO();
      private final Long clientId = 1L;
-     private final Long customerId = 1L;
-     private final Long reservationId = 0L;
+     private final Long userId = 1L;
+     private final Long reservationId = 1L;
      private final Long fakeId = 2L;
      private final Long realId = 1L;
      private final int numSlots = 2;
      private final Map<String, String> customValues = new HashMap<>();
 
-     private final LocalDateTime startTime = LocalDateTime.now();
+     private final LocalTime clientStartTime = LocalTime.of(6, 0, 0);
+     private final LocalTime clientEndTime = LocalTime.of(18, 0, 0);
+     private final int slotLength = 60;
+     private final int reservationsPerSlot = 2;
+     private final LocalDateTime resStartTime = LocalDateTime.of(2023, 11, 29, 11, 0, 0);
 
      @BeforeEach
      public void setUp() {
-         MockitoAnnotations.openMocks(this);
-         reservationService = new ReservationService(reservationRepository, clientRepository,
-                 attributeRepository, varcharTypeRepository, datetimeTypeRepository,  doubleTypeRepository,
-                 integerTypeRepository, booleanTypeRepository);
-         reservationDTO = new ReservationDTO(clientId, customerId, startTime, numSlots, customValues);
+        MockitoAnnotations.openMocks(this);
+        reservationService = new ReservationService(reservationRepository, clientRepository,
+                attributeRepository, varcharTypeRepository, datetimeTypeRepository,  doubleTypeRepository,
+                integerTypeRepository, booleanTypeRepository);
+
+        client = new Client(clientStartTime, clientEndTime, slotLength, reservationsPerSlot);
+        clientDTO = new ClientDTO(null, clientStartTime, clientEndTime, slotLength, reservationsPerSlot);
+
+        reservationDTO = new ReservationDTO(clientId, userId, resStartTime, numSlots, customValues);
+        reservation = new Reservation(reservationId, clientId, userId, resStartTime, 1);
      }
 
-     @Test
-     public void getReservations() {
-         when(reservationRepository.findAll()).thenReturn(Arrays.asList(reservation));
+    //  @Test
+    //  public void getReservations() {
+    //      when(reservationRepository.findAll()).thenReturn(Arrays.asList(reservation));
 
-         List<Reservation> result = reservationService.getReservations();
-         assertEquals(reservation, result.get(0));
-     }
+    //      List<Reservation> result = reservationService.getReservations();
+    //      assertEquals(reservation, result.get(0));
+    //  }
 
-     @Test
-     public void createClient(){
+    @Test
+    public void createClientMissingStartTime() {
+        clientDTO.setStartTime(null);
+        assertThrows(IllegalArgumentException.class, () -> reservationService.createClient(clientDTO));
+    }
+
+    @Test
+    public void createClientMissingEndTime() {
+        clientDTO.setEndTime(null);
+        assertThrows(IllegalArgumentException.class, () -> reservationService.createClient(clientDTO));
+    }
+
+    @Test
+    public void createClientInvalidSlotLength() {
+        clientDTO.setSlotLength(-1);
+        assertThrows(IllegalArgumentException.class, () -> reservationService.createClient(clientDTO));
+    }
+
+    @Test
+    public void createClientNegativeReservationsPerSlot() {
+        clientDTO.setReservationsPerSlot(-1);
+        assertThrows(IllegalArgumentException.class, () -> reservationService.createClient(clientDTO));
+    }
+
+    @Test
+    public void createClientInvalidStartTime() {
+        clientDTO.setStartTime(LocalTime.of(22, 0, 0));
+        assertThrows(IllegalArgumentException.class, () -> reservationService.createClient(clientDTO));
+    }
+
+    @Test
+    public void createClientInvalidAttributeType() {
+        HashMap<String, String> schema = new HashMap<>();
+        schema.put("key", "INVALID");
+        clientDTO.setCustomValues(schema);
+        assertThrows(IllegalArgumentException.class, () -> reservationService.createClient(clientDTO));
+    }
+
+    @Test
+     public void createClient() {
          HashMap<String, String> schema = new HashMap<>();
-         schema.put("key", "value");
+         schema.put("key", "VARCHAR");
 
-         ClientDTO clientDTO = new ClientDTO(schema, LocalTime.now(), LocalTime.now(), 1, 1);
+         ClientDTO clientDTO = new ClientDTO(schema, clientStartTime, clientEndTime, 1, 1);
          //when(clientRepository.save(any(Client.class))).thenReturn(client);
          //when(attributeRepository.save(any(Attribute.class))).thenReturn(mock(Attribute.class));
-         Long clientID = reservationService.createClient(clientDTO);
+         reservationService.createClient(clientDTO);
          verify(attributeRepository).save(any(Attribute.class));
      }
 
-     @Test
-     public void getNonExistentClientReservations(){
-         when(reservationRepository.findByClientId(anyLong())).thenReturn(new ArrayList<Reservation>());
-         when(attributeRepository.findByClientId(anyLong())).thenReturn(new ArrayList<Attribute>());
+    @Test
+    public void getClient() {
+        when(clientRepository.findById(anyLong())).thenReturn(Optional.of(client));
 
-         List<Map<String, String>> allReservations = reservationService.getClientReservations(1L);
-         assertEquals(0, allReservations.size());
-     }
+        Client result = reservationService.getClient(clientId);
+        assertEquals(client, result);
+    }
+
+    @Test
+    public void getNonExistentClient() {
+        when(clientRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> reservationService.getClient(fakeId));
+    }
+
+    @Test
+    public void getNonExistentClientReservations(){
+        when(clientRepository.existsById(anyLong())).thenReturn(false);
+        assertThrows(IllegalArgumentException.class, () -> reservationService.getClientReservations(fakeId));
+    }
 
      @Test
      public void getExistingClientReservations(){
-         Reservation reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
          ArrayList<Reservation> clientReservations = new ArrayList<>();
          clientReservations.add(reservation);
 
@@ -122,7 +181,8 @@ import java.util.Arrays;
          VarcharType varcharType = mock(VarcharType.class);
          IntegerType integerType = mock(IntegerType.class);
          BooleanType booleanType = mock(BooleanType.class);
-
+        
+         when(clientRepository.existsById(anyLong())).thenReturn(true);
          when(reservationRepository.findByClientId(anyLong())).thenReturn(clientReservations);
          when(attributeRepository.findByClientId(anyLong())).thenReturn(clientAttributes);
 
@@ -148,7 +208,7 @@ import java.util.Arrays;
 
      @Test
      public void deleteReservation() {
-         Reservation reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
+         Reservation reservation = new Reservation(reservationId, clientId, userId, LocalDateTime.now(), numSlots);
          ArrayList<Attribute> clientAttributes = new ArrayList<Attribute>();
          Attribute doubleAttribute = new Attribute(1L, "Time", "DOUBLE");
          Attribute datetimeAttribute = new Attribute(1L, "Time", "DATETIME");
@@ -181,75 +241,43 @@ import java.util.Arrays;
 
     @Test
     public void deleteNonExistentReservation() {
-        assertThrows(IllegalStateException.class, () -> reservationService.deleteReservation(fakeId));
+        assertThrows(IllegalArgumentException.class, () -> reservationService.deleteReservation(fakeId));
     }
 
     @Test
-    public void updateNonExistentReservation() {
-        when(reservationRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        Map<String, String> updateValues = new HashMap<>();
-        updateValues.put("startTime", startTime.toString());
-        updateValues.put("numSlots", Integer.toString(numSlots));
-        UpdateDTO updateDTO = new UpdateDTO(1L, updateValues);
-
-        assertThrows(IllegalStateException.class, () -> reservationService.updateReservation(updateDTO));
+    public void createReservationMissingClientId() {
+        reservationDTO.setClientId(null);
+        assertThrows(IllegalArgumentException.class, () -> reservationService.createReservation(reservationDTO));
+    }
+    
+    @Test
+    public void createReservationMissingUserId() {
+        reservationDTO.setUserId(null);
+        assertThrows(IllegalArgumentException.class, () -> reservationService.createReservation(reservationDTO));
     }
 
     @Test
-    public void testUpdateReservation_withStartTimeChange() {
-        Long reservationId = 1L;
-        LocalDateTime startTime = LocalDateTime.now();
-        Reservation reservation = new Reservation();
-        reservation.setStartTime(startTime.plusHours(1)); // Different start time
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
-
-        Map<String, String> updateValues = new HashMap<>();
-        updateValues.put("startTime", startTime.toString());
-        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
-
-        reservationService.updateReservation(updateDTO);
-        verify(reservationRepository).updateStartTime(eq(reservationId), eq(startTime));
-        verify(datetimeTypeRepository).updateField(eq(reservationId), anyLong(), eq(startTime));
+    public void createReservationMissingStartTime() {
+        reservationDTO.setStartTime(null);
+        assertThrows(IllegalArgumentException.class, () -> reservationService.createReservation(reservationDTO));
     }
 
     @Test
-    public void testUpdateReservation_withNumSlotsChange() {
-        Long reservationId = 1L;
-        Integer numSlots = 5;
-        Reservation reservation = new Reservation();
-        reservation.setNumSlots(numSlots + 1); // Different numSlots
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
-
-        Map<String, String> updateValues = new HashMap<>();
-        updateValues.put("numSlots", Integer.toString(numSlots));
-        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
-
-        reservationService.updateReservation(updateDTO);
-        verify(reservationRepository).updateNumSlots(eq(reservationId), eq(numSlots));
-        verify(integerTypeRepository).updateField(eq(reservationId), anyLong(), eq(numSlots));
+    public void createReservationMissingNumSlots() {
+        reservationDTO.setNumSlots(null);
+        assertThrows(IllegalArgumentException.class, () -> reservationService.createReservation(reservationDTO));
     }
 
     @Test
-    public void testUpdateReservation_withNoChange() {
-        Long reservationId = 1L;
-        LocalDateTime startTime = LocalDateTime.now();
-        Integer numSlots = 5;
-        Reservation reservation = new Reservation();
-        reservation.setStartTime(startTime);
-        reservation.setNumSlots(numSlots);
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+    public void createReservationNegativeNumSlots() {
+        reservationDTO.setNumSlots(-1);
+        assertThrows(IllegalArgumentException.class, () -> reservationService.createReservation(reservationDTO));
+    }
 
-        Map<String, String> updateValues = new HashMap<>();
-        updateValues.put("startTime", startTime.toString());
-        updateValues.put("numSlots", Integer.toString(numSlots));
-        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
-
-        reservationService.updateReservation(updateDTO);
-        verify(reservationRepository, never()).updateStartTime(anyLong(), any());
-        verify(reservationRepository, never()).updateNumSlots(anyLong(), anyInt());
-        verify(datetimeTypeRepository, never()).updateField(anyLong(), anyLong(), any());
-        verify(integerTypeRepository, never()).updateField(anyLong(), anyLong(), anyInt());
+    @Test
+    public void createReservationInvalidClientId() {
+        when(clientRepository.findReservationSchemaByClientId(anyLong())).thenReturn(null);
+        assertThrows(IllegalArgumentException.class, () -> reservationService.createReservation(reservationDTO));
     }
 
     @Test
@@ -396,47 +424,179 @@ import java.util.Arrays;
     }
 
     @Test
-    public void testUpdateReservation_withVariousAttributes() {
-        // Arrange
-        Long reservationId = 1L;
-        LocalDateTime startTime = LocalDateTime.now();
-        Integer numSlots = 5;
-
-        ArrayList<Attribute> clientAttributes = new ArrayList<>();
-        Attribute doubleAttribute = mock(Attribute.class);
-        Attribute datetimeAttribute = mock(Attribute.class);
-        Attribute varcharAttribute = mock(Attribute.class);
-        Attribute integerAttribute = mock(Attribute.class);
-        Attribute booleanAttribute = mock(Attribute.class);
-        when(doubleAttribute.getLabel()).thenReturn("Time");
-        when(datetimeAttribute.getLabel()).thenReturn("startTime");
-        when(varcharAttribute.getLabel()).thenReturn("Time");
-        when(integerAttribute.getLabel()).thenReturn("numSlots");
-        when(booleanAttribute.getLabel()).thenReturn("Time");
-
-        clientAttributes.add(doubleAttribute);
-        clientAttributes.add(datetimeAttribute);
-        clientAttributes.add(varcharAttribute);
-        clientAttributes.add(integerAttribute);
-        clientAttributes.add(booleanAttribute);
-
-        Reservation reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
-        reservation.setStartTime(startTime);
-        reservation.setNumSlots(numSlots);
-        when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
-        when(attributeRepository.findByClientId(reservation.getClientId())).thenReturn(clientAttributes);
+    public void updateNonExistentReservation() {
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         Map<String, String> updateValues = new HashMap<>();
-        updateValues.put("startTime", startTime.toString());
+        updateValues.put("startTime", resStartTime.toString());
         updateValues.put("numSlots", Integer.toString(numSlots));
+        UpdateDTO updateDTO = new UpdateDTO(1L, updateValues);
+
+        assertThrows(IllegalArgumentException.class, () -> reservationService.updateReservation(updateDTO));
+    }
+
+    @Test
+    public void testUpdateReservation_invalidStartTime() {
+        Map<String, String> updateValues = new HashMap<>();
+        LocalTime updatedStartTime = (clientStartTime.minusHours(1));
+        LocalDateTime updatedStartDateTime = LocalDateTime.of(resStartTime.toLocalDate(), updatedStartTime);
+        updateValues.put("startTime", updatedStartDateTime.toString());
         UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
 
-        reservationService.updateReservation(updateDTO);
+        when(reservationRepository.findByReservationId(anyLong())).thenReturn(reservation);
+        when(attributeRepository.findByClientId(anyLong())).thenReturn(new ArrayList<>());
+        when(clientRepository.findReservationSchemaByClientId(clientId)).thenReturn(client);
 
-        verify(doubleAttribute, atLeastOnce()).getLabel();
-        verify(datetimeAttribute, atLeastOnce()).getLabel();
-        verify(varcharAttribute, atLeastOnce()).getLabel();
-        verify(integerAttribute, atLeastOnce()).getLabel();
-        verify(booleanAttribute, atLeastOnce()).getLabel();
+        assertThrows(IllegalArgumentException.class, () -> reservationService.updateReservation(updateDTO));
+    }
+
+    @Test
+    public void testUpdateReservation_invalidSlotMultiple() {
+        Map<String, String> updateValues = new HashMap<>();
+        LocalDateTime updatedStartTime = resStartTime.plusMinutes(1);
+        updateValues.put("startTime", updatedStartTime.toString());
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        when(reservationRepository.findByReservationId(anyLong())).thenReturn(reservation);
+        when(attributeRepository.findByClientId(anyLong())).thenReturn(new ArrayList<>());
+        when(clientRepository.findReservationSchemaByClientId(clientId)).thenReturn(client);
+
+        assertThrows(IllegalArgumentException.class, () -> reservationService.updateReservation(updateDTO));
+    }
+
+    @Test
+    public void testUpdateReservation_negativeNumSlots() {
+        Map<String, String> updateValues = new HashMap<>();
+        int updatedNumSlots = -1;
+        updateValues.put("numSlots", Integer.toString(updatedNumSlots));
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        when(reservationRepository.findByReservationId(anyLong())).thenReturn(reservation);
+        when(attributeRepository.findByClientId(anyLong())).thenReturn(new ArrayList<>());
+        when(clientRepository.findReservationSchemaByClientId(clientId)).thenReturn(client);
+
+        assertThrows(IllegalArgumentException.class, () -> reservationService.updateReservation(updateDTO));
+    }
+
+    @Test
+    public void testUpdateReservation_invalidEndTime() {
+        Map<String, String> updateValues = new HashMap<>();
+        updateValues.put("numSlots", Integer.toString(10));
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        when(reservationRepository.findByReservationId(anyLong())).thenReturn(reservation);
+        when(attributeRepository.findByClientId(anyLong())).thenReturn(new ArrayList<>());
+        when(clientRepository.findReservationSchemaByClientId(clientId)).thenReturn(client);
+        
+        assertThrows(IllegalArgumentException.class, () -> reservationService.updateReservation(updateDTO));
+    }
+
+    @Test
+    public void testUpdateReservation_fullSlots() {
+        Map<String, String> updateValues = new HashMap<>();
+        updateValues.put("numSlots", Integer.toString(1));
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        Reservation reservation2 = new Reservation(reservationId + 1, clientId, userId, resStartTime, 1);
+        Reservation reservation3 = new Reservation(reservationId + 2, clientId, userId, resStartTime, 1);
+
+        when(reservationRepository.findByReservationId(anyLong())).thenReturn(reservation);
+        when(attributeRepository.findByClientId(anyLong())).thenReturn(new ArrayList<>());
+        when(clientRepository.findReservationSchemaByClientId(clientId)).thenReturn(client);
+        when(reservationRepository.findByClientId(clientId)).thenReturn(Arrays.asList(reservation2, reservation3));
+        
+        assertThrows(IllegalArgumentException.class, () -> reservationService.updateReservation(updateDTO));
+    }
+
+    @Test
+    public void testUpdateReservation_invalidAttribute() {
+        Map<String, String> updateValues = new HashMap<>();
+        updateValues.put("invalid", Integer.toString(10));
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        when(reservationRepository.findByReservationId(anyLong())).thenReturn(reservation);
+        when(attributeRepository.findByClientId(anyLong())).thenReturn(new ArrayList<>());
+        when(clientRepository.findReservationSchemaByClientId(clientId)).thenReturn(client);
+        
+        assertThrows(IllegalArgumentException.class, () -> reservationService.updateReservation(updateDTO));
+    }
+
+    @Test
+    public void testUpdateReservation_withStartTimeChange() {
+        Map<String, String> updateValues = new HashMap<>();
+        LocalDateTime updatedStartTime = resStartTime.plusHours(1);
+        updateValues.put("startTime", updatedStartTime.toString());
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        when(reservationRepository.findByReservationId(anyLong())).thenReturn(reservation);
+        when(attributeRepository.findByClientId(anyLong())).thenReturn(new ArrayList<>());
+        when(clientRepository.findReservationSchemaByClientId(clientId)).thenReturn(client);
+        when(reservationRepository.findByClientId(clientId)).thenReturn(new ArrayList<>());
+        
+        reservationService.updateReservation(updateDTO);
+        verify(reservationRepository).updateStartTime(eq(reservationId), eq(updatedStartTime));
+    }
+
+    @Test
+    public void testUpdateReservation_withNumSlotsChange() {
+        Map<String, String> updateValues = new HashMap<>();
+        int updatedNumSlots = numSlots + 1;
+        updateValues.put("numSlots", Integer.toString(updatedNumSlots));
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        when(reservationRepository.findByReservationId(anyLong())).thenReturn(reservation);
+        when(attributeRepository.findByClientId(anyLong())).thenReturn(new ArrayList<>());
+        when(clientRepository.findReservationSchemaByClientId(clientId)).thenReturn(client);
+        when(reservationRepository.findByClientId(clientId)).thenReturn(new ArrayList<>());
+
+        reservationService.updateReservation(updateDTO);
+        verify(reservationRepository).updateNumSlots(eq(reservationId), eq(updatedNumSlots));
+    }
+
+    @Test
+    public void testUpdateReservation_withCustomValueChange() {
+        Map<String, String> updateValues = new HashMap<>();
+        updateValues.put("doctorId", Integer.toString(100));
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        Attribute attribute = new Attribute(clientId, "doctorId", "INTEGER");
+
+        when(reservationRepository.findByReservationId(anyLong())).thenReturn(reservation);
+        when(attributeRepository.findByClientId(anyLong())).thenReturn(Arrays.asList(attribute));
+        when(clientRepository.findReservationSchemaByClientId(clientId)).thenReturn(client);
+        when(reservationRepository.findByClientId(clientId)).thenReturn(new ArrayList<>());
+        
+        reservationService.updateReservation(updateDTO);
+        verify(integerTypeRepository).updateField(eq(reservationId), any(), eq(100));
+    }
+
+    @Test
+    public void testUpdateReservation_withVariousAttributes() {
+        Map<String, String> updateValues = new HashMap<>();
+        LocalDateTime updatedStartTime = resStartTime.plusHours(1);
+        updateValues.put("startTime", updatedStartTime.toString());
+        updateValues.put("doctorId", Integer.toString(100));
+        updateValues.put("patientNotes", "diabetes");
+        updateValues.put("insurance", "true");
+        updateValues.put("birthday", "1999-01-01T00:00:00");
+        updateValues.put("temperature", Double.toString(98.6));
+
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        Attribute attribute = new Attribute(clientId, "doctorId", "INTEGER");
+        Attribute attribute2 = new Attribute(clientId, "patientNotes", "VARCHAR");
+        Attribute attribute3 = new Attribute(clientId, "insurance", "BOOLEAN");
+        Attribute attribute4 = new Attribute(clientId, "birthday", "DATETIME");
+        Attribute attribute6 = new Attribute(clientId, "temperature", "DOUBLE");
+                    
+        when(reservationRepository.findByReservationId(anyLong())).thenReturn(reservation);
+        when(attributeRepository.findByClientId(anyLong())).thenReturn(Arrays.asList(attribute, attribute2, attribute3, attribute4, attribute6));
+        when(clientRepository.findReservationSchemaByClientId(clientId)).thenReturn(client);
+        when(reservationRepository.findByClientId(clientId)).thenReturn(new ArrayList<>());
+        
+        reservationService.updateReservation(updateDTO);
+        verify(reservationRepository).updateStartTime(eq(reservationId), eq(updatedStartTime));
+        verify(integerTypeRepository).updateField(eq(reservationId), any(), eq(100));
+        verify(varcharTypeRepository).updateField(eq(reservationId), any(), eq("diabetes"));
     }
  }
