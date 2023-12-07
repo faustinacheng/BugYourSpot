@@ -1,6 +1,5 @@
 package com.example.bugyourspot;
-import com.example.bugyourspot.reservation.Reservation;
-import com.example.bugyourspot.reservation.ReservationRepository;
+import com.example.bugyourspot.reservation.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

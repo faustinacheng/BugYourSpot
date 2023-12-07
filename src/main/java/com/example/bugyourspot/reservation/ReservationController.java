@@ -61,23 +61,23 @@ public class ReservationController {
         }
     }
 
-    @DeleteMapping(path = "{reservationId}")
-    public void cancelReservation(@PathVariable("reservationId") Long reservationId) {
-        reservationService.deleteReservation(reservationId);
+    @DeleteMapping
+    public void cancelReservation(@RequestParam("reservationId") Long reservationId) {
+        try {
+            reservationService.deleteReservation(reservationId);
+        } catch (IllegalArgumentException e) {
+            System.err.println("ERROR: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
-    @PutMapping(path = "{reservationId}")
-    public void updateReservation(
-            @PathVariable("reservationId") Long reservationId,
-            @RequestParam(required = false) LocalDateTime startTime,
-            @RequestParam(required = false) Integer numSlots
-    ) {
-        //System.out.println(numSlots);
-        reservationService.updateReservation(reservationId, startTime, numSlots);
+    @PutMapping()
+    public void updateReservation(@RequestBody UpdateDTO updateDto) {
+        reservationService.updateReservation(updateDto);
     }
 
-    @GetMapping
-    public List<Reservation> getReservations() {
-        return reservationService.getReservations();
-    }
+    // @GetMapping
+    // public List<Reservation> getReservations() {
+    //     return reservationService.getReservations();
+    // }
 }

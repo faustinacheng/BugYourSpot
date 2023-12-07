@@ -129,7 +129,12 @@ public class ServiceIntegrationTest {
         Reservation modifiedReservation =  reservations.get(0);
         Long reservationId = modifiedReservation.getReservationId();
 
-        reservationService.updateReservation(reservationId, modifiedReservation.getStartTime(),3);
+        Map<String, String> updateValues = new HashMap<>();
+        updateValues.put("startTime", modifiedReservation.getStartTime().toString());
+        updateValues.put("numSlots", Integer.toString(3));
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        reservationService.updateReservation(updateDTO);
         assertEquals(modifiedReservation.getNumSlots(), 3);
     }
 

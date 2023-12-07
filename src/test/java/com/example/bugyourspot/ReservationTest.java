@@ -1,6 +1,6 @@
 package com.example.bugyourspot;
+import com.example.bugyourspot.reservation.*;
 
-import com.example.bugyourspot.reservation.Reservation;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import static org.junit.jupiter.api.Assertions.assertEquals;

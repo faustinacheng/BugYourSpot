@@ -9,6 +9,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -184,8 +188,12 @@ import java.util.Arrays;
     public void updateNonExistentReservation() {
         when(reservationRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(IllegalStateException.class, () -> reservationService.updateReservation(1L,
-                                                            LocalDateTime.now(), numSlots));
+        Map<String, String> updateValues = new HashMap<>();
+        updateValues.put("startTime", startTime.toString());
+        updateValues.put("numSlots", Integer.toString(numSlots));
+        UpdateDTO updateDTO = new UpdateDTO(1L, updateValues);
+
+        assertThrows(IllegalStateException.class, () -> reservationService.updateReservation(updateDTO));
     }
 
     @Test
@@ -196,7 +204,11 @@ import java.util.Arrays;
         reservation.setStartTime(startTime.plusHours(1)); // Different start time
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 
-        reservationService.updateReservation(reservationId, startTime, null);
+        Map<String, String> updateValues = new HashMap<>();
+        updateValues.put("startTime", startTime.toString());
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        reservationService.updateReservation(updateDTO);
         verify(reservationRepository).updateStartTime(eq(reservationId), eq(startTime));
         verify(datetimeTypeRepository).updateField(eq(reservationId), anyLong(), eq(startTime));
     }
@@ -209,7 +221,11 @@ import java.util.Arrays;
         reservation.setNumSlots(numSlots + 1); // Different numSlots
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 
-        reservationService.updateReservation(reservationId, null, numSlots);
+        Map<String, String> updateValues = new HashMap<>();
+        updateValues.put("numSlots", Integer.toString(numSlots));
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        reservationService.updateReservation(updateDTO);
         verify(reservationRepository).updateNumSlots(eq(reservationId), eq(numSlots));
         verify(integerTypeRepository).updateField(eq(reservationId), anyLong(), eq(numSlots));
     }
@@ -224,7 +240,12 @@ import java.util.Arrays;
         reservation.setNumSlots(numSlots);
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 
-        reservationService.updateReservation(reservationId, startTime, numSlots);
+        Map<String, String> updateValues = new HashMap<>();
+        updateValues.put("startTime", startTime.toString());
+        updateValues.put("numSlots", Integer.toString(numSlots));
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        reservationService.updateReservation(updateDTO);
         verify(reservationRepository, never()).updateStartTime(anyLong(), any());
         verify(reservationRepository, never()).updateNumSlots(anyLong(), anyInt());
         verify(datetimeTypeRepository, never()).updateField(anyLong(), anyLong(), any());
@@ -374,42 +395,48 @@ import java.util.Arrays;
         assertThrows(IllegalArgumentException.class, () -> reservationService.createReservation(reservationDTO));
     }
 
-     @Test
-     public void testUpdateReservation_withVariousAttributes() {
-         // Arrange
-         Long reservationId = 1L;
-         LocalDateTime startTime = LocalDateTime.now();
-         Integer numSlots = 5;
+    @Test
+    public void testUpdateReservation_withVariousAttributes() {
+        // Arrange
+        Long reservationId = 1L;
+        LocalDateTime startTime = LocalDateTime.now();
+        Integer numSlots = 5;
 
-         ArrayList<Attribute> clientAttributes = new ArrayList<>();
-         Attribute doubleAttribute = mock(Attribute.class);
-         Attribute datetimeAttribute = mock(Attribute.class);
-         Attribute varcharAttribute = mock(Attribute.class);
-         Attribute integerAttribute = mock(Attribute.class);
-         Attribute booleanAttribute = mock(Attribute.class);
-         when(doubleAttribute.getLabel()).thenReturn("Time");
-         when(datetimeAttribute.getLabel()).thenReturn("startTime");
-         when(varcharAttribute.getLabel()).thenReturn("Time");
-         when(integerAttribute.getLabel()).thenReturn("numSlots");
-         when(booleanAttribute.getLabel()).thenReturn("Time");
+        ArrayList<Attribute> clientAttributes = new ArrayList<>();
+        Attribute doubleAttribute = mock(Attribute.class);
+        Attribute datetimeAttribute = mock(Attribute.class);
+        Attribute varcharAttribute = mock(Attribute.class);
+        Attribute integerAttribute = mock(Attribute.class);
+        Attribute booleanAttribute = mock(Attribute.class);
+        when(doubleAttribute.getLabel()).thenReturn("Time");
+        when(datetimeAttribute.getLabel()).thenReturn("startTime");
+        when(varcharAttribute.getLabel()).thenReturn("Time");
+        when(integerAttribute.getLabel()).thenReturn("numSlots");
+        when(booleanAttribute.getLabel()).thenReturn("Time");
 
-         clientAttributes.add(doubleAttribute);
-         clientAttributes.add(datetimeAttribute);
-         clientAttributes.add(varcharAttribute);
-         clientAttributes.add(integerAttribute);
-         clientAttributes.add(booleanAttribute);
+        clientAttributes.add(doubleAttribute);
+        clientAttributes.add(datetimeAttribute);
+        clientAttributes.add(varcharAttribute);
+        clientAttributes.add(integerAttribute);
+        clientAttributes.add(booleanAttribute);
 
-         Reservation reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
-         reservation.setStartTime(startTime);
-         reservation.setNumSlots(numSlots);
-         when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
-         when(attributeRepository.findByClientId(reservation.getClientId())).thenReturn(clientAttributes);
-         reservationService.updateReservation(reservationId, startTime, numSlots);
+        Reservation reservation = new Reservation(reservationId, clientId, customerId, LocalDateTime.now(), numSlots);
+        reservation.setStartTime(startTime);
+        reservation.setNumSlots(numSlots);
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
+        when(attributeRepository.findByClientId(reservation.getClientId())).thenReturn(clientAttributes);
 
-         verify(doubleAttribute, atLeastOnce()).getLabel();
-         verify(datetimeAttribute, atLeastOnce()).getLabel();
-         verify(varcharAttribute, atLeastOnce()).getLabel();
-         verify(integerAttribute, atLeastOnce()).getLabel();
-         verify(booleanAttribute, atLeastOnce()).getLabel();
-     }
+        Map<String, String> updateValues = new HashMap<>();
+        updateValues.put("startTime", startTime.toString());
+        updateValues.put("numSlots", Integer.toString(numSlots));
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+
+        reservationService.updateReservation(updateDTO);
+
+        verify(doubleAttribute, atLeastOnce()).getLabel();
+        verify(datetimeAttribute, atLeastOnce()).getLabel();
+        verify(varcharAttribute, atLeastOnce()).getLabel();
+        verify(integerAttribute, atLeastOnce()).getLabel();
+        verify(booleanAttribute, atLeastOnce()).getLabel();
+    }
  }

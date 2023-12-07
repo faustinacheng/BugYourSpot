@@ -1,4 +1,5 @@
-package com.example.bugyourspot.reservation;
+package com.example.bugyourspot;
+import com.example.bugyourspot.reservation.*;
 
 import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;

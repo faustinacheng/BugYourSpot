@@ -69,10 +69,10 @@ public class ReservationService {
             throw new IllegalArgumentException("Missing required field: endTime");
         }
         if (slotLength <= 0) {
-            throw new IllegalArgumentException("Missing required field: slotLength");
+            throw new IllegalArgumentException("Missing/invalid required field: slotLength");
         }
         if (reservationsPerSlot <= 0) {
-            throw new IllegalArgumentException("Missing required field: reservationsPerSlot");
+            throw new IllegalArgumentException("Missing/invalid required field: reservationsPerSlot");
         }
         if (startTime.isAfter(endTime)) {
             throw new IllegalArgumentException("Start time must be before end time");
@@ -276,15 +276,15 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long reservationId) {
-        boolean exists = reservationRepository.existsById(reservationId);
-        if (!exists) {
+        Reservation reservation = reservationRepository.findByReservationId(reservationId);
+
+        if (reservation == null) {
             throw new IllegalStateException("reservation with id " + reservationId + " does not exist");
         }
 
-        Reservation reservation = reservationRepository.findByReservationId(reservationId);
-
         // get the attributes associated with this reservation (based on which client it belongs to)
         Long clientId = reservation.getClientId();
+
         List<Attribute> attributes = attributeRepository.findByClientId(clientId);
         for (Attribute attribute: attributes){
             String dataType = attribute.getDataType();
@@ -297,39 +297,169 @@ public class ReservationService {
                 case "DOUBLE" -> doubleTypeRepository.deleteById(reservationId);
             }
         }
+
         reservationRepository.deleteById(reservationId);
     }
 
     @Transactional
-    public void updateReservation(Long reservationId, LocalDateTime startTime, Integer numSlots) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalStateException("reservation with id " + reservationId + " does not exist"));
+    public void updateReservation(UpdateDTO updateDto) {
+        Long reservationId = updateDto.getReservationId();
+        Reservation reservation = reservationRepository.findByReservationId(reservationId);
+
+        if (reservation == null) {
+            throw new IllegalStateException("reservation with id " + reservationId + " does not exist");
+        }
 
         Long clientId = reservation.getClientId();
         List<Attribute> attributes = attributeRepository.findByClientId(clientId);
-        Long startTimeId = -1L;
-        Long numSlotsId = -1L;
-        for (Attribute attribute: attributes){
-            if (attribute.getLabel().equals("startTime")){
-                startTimeId = attribute.getAttributeId();
+        
+        // for each key-value pair in the updateDto, update the corresponding attribute if it exists
+        for (Map.Entry<String, String> entry : updateDto.getUpdateValues().entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            if (key.equals("startTime") || key.equals("numSlots")) {
+                Client client = clientRepository.findReservationSchemaByClientId(clientId);
+
+                LocalDateTime startTime = reservation.getStartTime();
+                Integer numSlots = reservation.getNumSlots();
+
+                if (key.equals("startTime")) {
+                    startTime = LocalDateTime.parse(value);
+
+                    if (startTime.toLocalTime().isBefore(client.getStartTime())) {
+                        throw new IllegalArgumentException("Reservation time is not within client's time range");
+                    }
+
+                    if (startTime.toLocalTime().getMinute() % client.getSlotLength() != 0) {
+                        throw new IllegalArgumentException("Reservation start time is not a multiple of slot length");
+                    }
+
+                } else if (key.equals("numSlots")) {
+                    numSlots = Integer.parseInt(value);
+
+                    if (numSlots <= 0) {
+                        throw new IllegalArgumentException("numSlots must be greater than 0");
+                    }
+
+                    LocalDateTime endTime = reservation.getStartTime().plusMinutes(client.getSlotLength() * numSlots);
+
+                    if (endTime.toLocalTime().isAfter(client.getEndTime())) {
+                        throw new IllegalArgumentException("Reservation time is not within client's time range");
+                    }
+                }
+
+                // Check that the time slots are not fully booked
+                Integer clientReservationsPerSlot = client.getReservationsPerSlot();
+
+                // Track the number of reservations per requested time slot
+                Map<LocalDateTime, Integer> filledReservationsPerSlot = new HashMap<>();
+                for (int i = 0; i < numSlots; i++) {
+                    LocalDateTime slotStartTime = startTime.plusMinutes(client.getSlotLength() * i);
+                    filledReservationsPerSlot.put(slotStartTime, 0);
+                }
+
+                for (Reservation prevReservation: reservationRepository.findByClientId(clientId)) {
+                    if (prevReservation.getReservationId().equals(reservationId)) {
+                        continue;
+                    }
+
+                    LocalDateTime prevStartTime = prevReservation.getStartTime();
+                    int prevNumSlots = prevReservation.getNumSlots();
+
+                    for (int i = 0; i < prevNumSlots; i++) {
+                        LocalDateTime slotStartTime = prevStartTime.plusMinutes(client.getSlotLength() * i);
+
+                        if (filledReservationsPerSlot.containsKey(slotStartTime)) {
+                            filledReservationsPerSlot.put(slotStartTime, filledReservationsPerSlot.get(slotStartTime) + 1);
+
+                            if (filledReservationsPerSlot.get(slotStartTime) == clientReservationsPerSlot) {
+                                throw new IllegalArgumentException("Reservation time slots are fully booked");
+                            }
+                        }
+                    }
+                }
+
+                if (key.equals("startTime")) {
+                    reservationRepository.updateStartTime(reservationId, startTime);
+                } else if (key.equals("numSlots")) {
+                    reservationRepository.updateNumSlots(reservationId, numSlots);
+                }
+                
+                continue;
             }
-            else if (attribute.getLabel().equals("numSlots")){
-                numSlotsId = attribute.getAttributeId();
+
+            // find the attribute with the given label
+            Attribute attribute = null;
+            for (Attribute a : attributes) {
+                if (a.getLabel().equals(key)) {
+                    attribute = a;
+                    break;
+                }
             }
-        }
 
-        numSlotsId = 3L;
+            if (attribute == null) {
+                throw new IllegalStateException("attribute with label " + key + " does not exist");
+            }
 
-        if (startTime != null && !Objects.equals(reservation.getStartTime(), startTime)) {
-            reservation.setStartTime(startTime);
-            reservationRepository.updateStartTime(reservationId, startTime);
-            datetimeTypeRepository.updateField(reservationId, startTimeId, startTime);
-        }
+            String dataType = attribute.getDataType();
+            Long attributeId = attribute.getAttributeId();
 
-        if (numSlots != null && !Objects.equals(reservation.getNumSlots(), numSlots)) {
-            reservation.setNumSlots(numSlots);
-            reservationRepository.updateNumSlots(reservationId, numSlots);
-            integerTypeRepository.updateField(reservationId, numSlotsId, numSlots);
+            switch (dataType) {
+                case "DATETIME" -> {
+                    LocalDateTime datetime = LocalDateTime.parse(value);
+                    datetimeTypeRepository.updateField(reservationId, attributeId, datetime);
+                }
+                case "VARCHAR" -> varcharTypeRepository.updateField(reservationId, attributeId, value);
+                case "INTEGER" -> {
+                    Integer integer = Integer.parseInt(value);
+                    integerTypeRepository.updateField(reservationId, attributeId, integer);
+                }
+                case "BOOLEAN" -> {
+                    Boolean bool = Boolean.parseBoolean(value);
+                    booleanTypeRepository.updateField(reservationId, attributeId, bool);
+                }
+                case "DOUBLE" -> {
+                    Double dbl = Double.parseDouble(value);
+                    doubleTypeRepository.updateField(reservationId, attributeId, dbl);
+                }
+            }
         }
     }
+
+    // @Transactional
+    // public void updateReservation(Long reservationId, LocalDateTime startTime, Integer numSlots) {
+    //     Reservation reservation = reservationRepository.findByReservationId(reservationId);
+
+    //     if (reservation == null) {
+    //         throw new IllegalStateException("reservation with id " + reservationId + " does not exist");
+    //     }
+
+    //     Long clientId = reservation.getClientId();
+    //     List<Attribute> attributes = attributeRepository.findByClientId(clientId);
+    //     Long startTimeId = -1L;
+    //     Long numSlotsId = -1L;
+    //     for (Attribute attribute: attributes){
+    //         if (attribute.getLabel().equals("startTime")){
+    //             startTimeId = attribute.getAttributeId();
+    //         }
+    //         else if (attribute.getLabel().equals("numSlots")){
+    //             numSlotsId = attribute.getAttributeId();
+    //         }
+    //     }
+
+    //     numSlotsId = 3L;
+
+    //     if (startTime != null && !Objects.equals(reservation.getStartTime(), startTime)) {
+    //         reservation.setStartTime(startTime);
+    //         reservationRepository.updateStartTime(reservationId, startTime);
+    //         datetimeTypeRepository.updateField(reservationId, startTimeId, startTime);
+    //     }
+
+    //     if (numSlots != null && !Objects.equals(reservation.getNumSlots(), numSlots)) {
+    //         reservation.setNumSlots(numSlots);
+    //         reservationRepository.updateNumSlots(reservationId, numSlots);
+    //         integerTypeRepository.updateField(reservationId, numSlotsId, numSlots);
+    //     }
+    // }
 }

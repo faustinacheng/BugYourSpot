@@ -63,7 +63,7 @@ public class ConcurrentClientTest {
     @BeforeEach
     public void setUp() {
         HashMap<String, String> schema = new HashMap<>();
-        schema.put("key", "value");
+        schema.put("key", "VARCHAR");
 
         MockitoAnnotations.openMocks(this);
         reservationService = new ReservationService(reservationRepository, clientRepository,
@@ -145,7 +145,11 @@ public class ConcurrentClientTest {
         assertEquals(reservations.size(), 1);
         Reservation modifiedReservation =  reservations.get(0);
         Long reservationId = modifiedReservation.getReservationId();
-        reservationService.updateReservation(reservationId, modifiedReservation.getStartTime(), 4);
+        Map<String, String> updateValues = new HashMap<>();
+        updateValues.put("startTime", modifiedReservation.getStartTime().toString());
+        updateValues.put("numSlots", "4");
+        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+        reservationService.updateReservation(updateDTO);
 
         // should not affect the numSlots value for second client's existing reservation
         List<Reservation> firstReservations = reservationRepository.findByClientId(firstClientId);
