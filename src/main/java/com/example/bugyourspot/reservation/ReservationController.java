@@ -73,7 +73,12 @@ public class ReservationController {
 
     @PutMapping()
     public void updateReservation(@RequestBody UpdateDTO updateDto) {
-        reservationService.updateReservation(updateDto);
+        try {
+            reservationService.updateReservation(updateDto);
+        } catch (IllegalArgumentException e) {
+            System.err.println("ERROR: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     // @GetMapping
