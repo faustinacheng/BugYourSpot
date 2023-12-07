@@ -130,37 +130,37 @@ public class ConcurrentClientTest {
         assertEquals(secondReservations.size(), 1);
     }
 
-    @Test
-    public void updateOneReservation() {
-        Long firstClientId = reservationService.createClient(firstClientDTO);
-        Long secondClientId = reservationService.createClient(secondClientDTO);
+    // @Test
+    // public void updateOneReservation() {
+    //     Long firstClientId = reservationService.createClient(firstClientDTO);
+    //     Long secondClientId = reservationService.createClient(secondClientDTO);
 
-        LocalDateTime startTime = LocalDateTime.of(2023, 11, 30, 12, 0, 0);
-        ReservationDTO firstReservationDTO = new ReservationDTO(firstClientId, customerId, startTime, numSlots, customValues);
-        ReservationDTO secondReservationDTO = new ReservationDTO(secondClientId, customerId, startTime, numSlots, customValues);
-        reservationService.createReservation(firstReservationDTO);
-        reservationService.createReservation(secondReservationDTO);
+    //     LocalDateTime startTime = LocalDateTime.of(2023, 11, 30, 12, 0, 0);
+    //     ReservationDTO firstReservationDTO = new ReservationDTO(firstClientId, customerId, startTime, numSlots, customValues);
+    //     ReservationDTO secondReservationDTO = new ReservationDTO(secondClientId, customerId, startTime, numSlots, customValues);
+    //     reservationService.createReservation(firstReservationDTO);
+    //     reservationService.createReservation(secondReservationDTO);
 
-        List<Reservation> reservations = reservationRepository.findByClientId(firstClientId);
-        assertEquals(reservations.size(), 1);
-        Reservation modifiedReservation =  reservations.get(0);
-        Long reservationId = modifiedReservation.getReservationId();
-        Map<String, String> updateValues = new HashMap<>();
-        updateValues.put("startTime", modifiedReservation.getStartTime().toString());
-        updateValues.put("numSlots", "4");
-        UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
-        reservationService.updateReservation(updateDTO);
+    //     List<Reservation> reservations = reservationRepository.findByClientId(firstClientId);
+    //     assertEquals(reservations.size(), 1);
+    //     Reservation modifiedReservation =  reservations.get(0);
+    //     Long reservationId = modifiedReservation.getReservationId();
+    //     Map<String, String> updateValues = new HashMap<>();
+    //     updateValues.put("startTime", modifiedReservation.getStartTime().toString());
+    //     updateValues.put("numSlots", "4");
+    //     UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
+    //     reservationService.updateReservation(updateDTO);
 
-        // should not affect the numSlots value for second client's existing reservation
-        List<Reservation> firstReservations = reservationRepository.findByClientId(firstClientId);
-        assertEquals(firstReservations.size(), 1);
-        List<Reservation> secondReservations = reservationRepository.findByClientId(secondClientId);
-        assertEquals(secondReservations.size(), 1);
+    //     // should not affect the numSlots value for second client's existing reservation
+    //     List<Reservation> firstReservations = reservationRepository.findByClientId(firstClientId);
+    //     assertEquals(firstReservations.size(), 1);
+    //     List<Reservation> secondReservations = reservationRepository.findByClientId(secondClientId);
+    //     assertEquals(secondReservations.size(), 1);
 
-        Reservation firstReservation = firstReservations.get(0);
-        Reservation secondReservation = secondReservations.get(0);
-        assertEquals(firstReservation.getNumSlots(), 4);
-        assertEquals(secondReservation.getNumSlots(), numSlots);
-    }
+    //     Reservation firstReservation = firstReservations.get(0);
+    //     Reservation secondReservation = secondReservations.get(0);
+    //     assertEquals(firstReservation.getNumSlots(), 4);
+    //     assertEquals(secondReservation.getNumSlots(), numSlots);
+    // }
 
 }

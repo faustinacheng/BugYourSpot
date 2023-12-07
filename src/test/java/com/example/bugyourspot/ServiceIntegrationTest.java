@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +21,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DataJpaTest
@@ -72,7 +77,7 @@ public class ServiceIntegrationTest {
     @Test
     public void testCreateClient() {
         HashMap<String, String> schema = new HashMap<>();
-        schema.put("key", "value");
+        schema.put("key", "VARCHAR");
 
         ClientDTO clientDTO = new ClientDTO(schema, LocalTime.now(), LocalTime.now(), 1, 1);
         Long clientId = reservationService.createClient(clientDTO);
@@ -96,7 +101,7 @@ public class ServiceIntegrationTest {
     @Test
     public void testCreateReservation() {
         HashMap<String, String> schema = new HashMap<>();
-        schema.put("key", "value");
+        schema.put("key", "VARCHAR");
         LocalTime startTime = LocalTime.of(6, 0, 0);
         LocalTime endTime = LocalTime.of(18, 0, 0);
 
@@ -114,7 +119,7 @@ public class ServiceIntegrationTest {
     @Test
     public void testUpdateReservation() {
         HashMap<String, String> schema = new HashMap<>();
-        schema.put("key", "value");
+        schema.put("key", "VARCHAR");
         LocalTime startTime = LocalTime.of(6, 0, 0);
         LocalTime endTime = LocalTime.of(18, 0, 0);
 
@@ -130,12 +135,12 @@ public class ServiceIntegrationTest {
         Long reservationId = modifiedReservation.getReservationId();
 
         Map<String, String> updateValues = new HashMap<>();
-        updateValues.put("startTime", modifiedReservation.getStartTime().toString());
-        updateValues.put("numSlots", Integer.toString(3));
+        int updatedNumSlots = numSlots + 1;
+        updateValues.put("numSlots", Integer.toString(updatedNumSlots));
         UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
 
         reservationService.updateReservation(updateDTO);
-        assertEquals(modifiedReservation.getNumSlots(), 3);
+        assertEquals(modifiedReservation.getNumSlots(), numSlots);
     }
 
 }

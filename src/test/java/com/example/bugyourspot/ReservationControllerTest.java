@@ -3,12 +3,15 @@ import com.example.bugyourspot.reservation.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -63,33 +66,22 @@ public class ReservationControllerTest {
         verify(reservationService).deleteReservation(reservationId);
     }
 
-    // @Test
-    // public void updateReservation() throws Exception {
-    //     LocalDateTime startTime = LocalDateTime.now().plusHours(1);
-    //     Map<String, String> updateValues = new HashMap<>();
-    //     updateValues.put("startTime", startTime.toString());
-    //     updateValues.put("numSlots", Integer.toString(numSlots));
-    //     UpdateDTO updateDTO = new UpdateDTO(reservationId, updateValues);
-    //     doNothing().when(reservationService).updateReservation(updateDTO);
+    @Test
+    public void updateReservation() throws Exception {
+        // actually update reservation
+        mockMvc.perform(put("/api/v1/reservation")
+                .contentType("application/json")
+                .content("{\"reservationId\": 1,\"updateValues\": {\"startTime\": \"2023-11-29T11:00:00\",\"numSlots\": 1,\"doctorId\": 22,\"patientNotes\": \"diabetes\"}}"))
+                .andExpect(status().isOk());
 
+        // verify that reservation was updated
+        ArgumentCaptor<UpdateDTO> argument = ArgumentCaptor.forClass(UpdateDTO.class);
+        verify(reservationService).updateReservation(argument.capture());
+        assertEquals(1, argument.getValue().getReservationId());
+        assertEquals("2023-11-29T11:00:00", argument.getValue().getUpdateValues().get("startTime"));
+        assertEquals("1", argument.getValue().getUpdateValues().get("numSlots"));
+        assertEquals("22", argument.getValue().getUpdateValues().get("doctorId"));
+        assertEquals("diabetes", argument.getValue().getUpdateValues().get("patientNotes"));
 
-
-    //     // actually update reservation
-    //     mockMvc.perform(put("/api/v1/reservation")
-    //                     .contentType("application/json")
-    //                     .content("{'reservationId': 1," +
-    //                                 "'updateValues': {" +
-    //                                     "'startTime': " + startTime.toString() + "," +
-    //                                     "'numSlots': " + Integer.toString(numSlots) +
-    //                                 "}" + 
-    //                             "}"))
-    //                     .andExpect(status().isOk());
-
-    //     // verify that reservation was updated
-    //     Map<String, String> updateValues2 = new HashMap<>();
-    //     updateValues2.put("startTime", startTime.toString());
-    //     updateValues2.put("numSlots", Integer.toString(3));
-    //     UpdateDTO updateDTO2 = new UpdateDTO(reservationId, updateValues2);
-    //     verify(reservationService).updateReservation(updateDTO2);
-    // }
+    }
 }
