@@ -29,10 +29,10 @@ The ReservationService class acts as the next layer of logic, providing the meth
 
 # API Documentation
 
-`POST /reservations/createClient`\
+`POST api/v1/reservation/createClient`\
 Description: The client provides certain fields that they want to represent a reservation with. This is in the form of a JSON object. There are a set of required reservation parameters they have to specify (startTime, endTime, slotLength, reservationsPerSlot) as well as a customValues JSON they can pass in for custom fields they want to include for their reservations. The service validates these fields to ensure that it matches the expected format. Once validated, our service will dynamically generate the database schema based on the custom fields and their data types. Thus, this API should be called just once and before all other API calls.\
 Request Body: JSON object that represents the fields of a reservation\
-Example Usage: `/createClient`
+Example Usage:
 
 1. Restaurant
 
@@ -78,9 +78,9 @@ Response: 200 OK and client ID
 
 Other possible statuses: 400 Bad Request and relevant error message if endTime is before startTime/required fields are not passed in/in the wrong format
 
-`GET /reservation/getClient`
-Description: Get all clients that are registered with our reservation service. Mainly used for testing purposes, will require root permissions to access.\
-Example Usage: `/reservations/getClient?clientId=1`
+`GET api/v1/reservation/getClient?clientId={}`
+Description: Get the client shema from a registered client ID.\
+Example Usage: `api/v1/reservation/getClient?clientId=1`
 
 Response: 200 OK and client information
 
@@ -88,13 +88,6 @@ Response: 200 OK and client information
 [
   {
     "clientId": 1,
-    "startTime": "09:00:00",
-    "endTime": "21:00:00",
-    "slotLength": 30,
-    "reservationsPerSlot": 2
-  },
-  {
-    "clientId": 2,
     "startTime": "06:00:00",
     "endTime": "18:00:00",
     "slotLength": 60,
@@ -103,10 +96,9 @@ Response: 200 OK and client information
 ]
 ```
 
-`POST /reservation`\
+`POST api/v1/reservation`\
 Description: Create a new reservation.\
 Request Body: JSON object representing the reservation details.\
-Example Usage: `/reservations`
 
 1. Restaurant
 
@@ -146,19 +138,23 @@ Other possible statuses: 400 Bad Request with relevant error message for invalid
 
 Error if client not initialized
 
-`PUT /reservations`\
+`PUT api/v1/reservation`\
 Description: Update an existing reservation or time slot.\
 Usage: Applications can use this endpoint to modify reservation details, such as changing the booking time or updating user information.\
 
 Request Body: JSON with reservationId, and the fields to be updated
 
-Example request: `/reservations`
+Example request:
 
 ```json
 {
   "reservationId": 1,
-  "notes": "Concern for high blood pressure and diarrhea",
-  "doctor": "Dr. Phil"
+  "updateValues": {
+    "startTime": "2023-12-07T16:00:00",
+    "numSlots": 2,
+    "doctorId": 22,
+    "patientNotes": "hypothyroidism"
+  }
 }
 ```
 
@@ -166,11 +162,11 @@ Response: 200 OK
 
 Other possible statuses: 400 Bad Request with relevant error message for invalid format/missing/extra fields/unavailable booking/booking not within allowed time/reservation Id doesn't exist
 
-`DELETE /reservations?reservationId={reservationId}`\
+`DELETE api/v1/reservation?reservationId={}`\
 Description: Delete a reservation or time slot given a path variable.
 Usage: Applications can call this endpoint to remove a reservation when it's no longer needed or has been canceled.
 Request Body: None
-Example request: `/reservations?reservationId=1`
+Example request: `api/v1/reservation?reservationId=1`
 
 ```json
 1
@@ -180,13 +176,13 @@ Response: 200 OK
 
 Possible statuses: 400 Bad Request with relevant error message if reservation Id doesn't exist
 
-`GET /reservations/getClientReservations`\
+`GET api/v1/reservation/getClientReservations?clientId={}`\
 Description: Retrieve a list of all reservations made by a client.\
 Query Parameters: `clientId`
 
 Our service will return all reservations made by the client – represented as a simple JSON object with a list of reservation objects.
 
-Example Usage: `/reservations/getClientReservations?clientId=1`
+Example Usage: `api/v1/reservation/getClientReservations?clientId=1`
 Response: 200 OK
 
 1. Restaurant
