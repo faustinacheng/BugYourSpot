@@ -15,6 +15,8 @@ Previously, users might be constrained with the kind of data they can store in a
 
 Use Maven to build/run client app, which can then be accessed at `localhost:8080/greeting`.
 
+More information about CricketCare in the README of the CricketCare repo.
+
 # Components:
 
 API Description and Workflow:
