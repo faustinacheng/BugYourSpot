@@ -11,6 +11,10 @@ The client app, Cricket Care, is a web application used by hospital employees to
 
 Previously, users might be constrained with the kind of data they can store in a booking service such as ours. But with BugYourSpot, we allow flexibility by letting their schema be customized, while still providing the foundational booking service. Additionally, the service also performs certain error checks such as checking that times are within their allowable time range, if the time slot has already been booked, and the required fields are being passed in and in the right format, etc.
 
+## To Build:
+
+Use Maven to build/run client app, which can then be accessed at `localhost:8080/greeting`.
+
 # Components:
 
 API Description and Workflow:
