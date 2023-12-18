@@ -2,6 +2,7 @@ package com.example.bugyourspot.reservation;
 
 import jakarta.transaction.Transactional;
 import org.aspectj.weaver.ast.Var;
+import org.checkerframework.checker.units.qual.C;
 import org.checkerframework.checker.units.qual.s;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
@@ -107,6 +108,25 @@ public class ReservationService {
         return clientRepository.findById(clientId)
                 .orElseThrow(() -> new IllegalArgumentException("client with id " + clientId + " does not exist"));
     }
+
+     public ClientDTO getClientCustoms (Long clientId) {
+        Client client = clientRepository.findReservationSchemaByClientId(clientId);
+        if (client == null) {
+            throw new IllegalArgumentException("client with id " + clientId + " does not exist");
+        }
+
+        List<Attribute> attributes = attributeRepository.findByClientId(clientId);
+        Map<String, String> results = new LinkedHashMap<String, String>();
+
+        for (Attribute attribute: attributes) {
+            String label = attribute.getLabel();
+            String dataType = attribute.getDataType();
+            results.put(label, dataType);
+        }
+
+        ClientDTO clientDTO = new ClientDTO(results, client.getStartTime(), client.getEndTime(), client.getSlotLength(), client.getReservationsPerSlot());
+        return clientDTO;
+     }
 
     public List<Map<String, String>> getClientReservations(Long clientId) {
         if (!clientRepository.existsById(clientId)) {

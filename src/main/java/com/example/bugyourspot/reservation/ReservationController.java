@@ -41,6 +41,16 @@ public class ReservationController {
         }
     }
 
+    @GetMapping("/getClientCustoms")
+    public ClientDTO getClientCustoms(@RequestParam("clientId") Long clientId) {
+        try {
+            return reservationService.getClientCustoms(clientId);
+        } catch (IllegalArgumentException e) {
+            System.err.println("ERROR: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
     @GetMapping("/getClientReservations")
     public List<Map<String, String>> getClientReservations(@RequestParam("clientId") Long clientId) {
         try {
